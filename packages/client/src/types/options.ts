@@ -6,6 +6,7 @@ export interface AccountsClientOptions {
    * Default: 'localStorage'.
    */
   tokenStorage?: TokenStorage;
+
   /**
    * Token that will prefix the storage key.
    * Default: 'accounts'.
