@@ -1,11 +1,32 @@
-import { AccountsRequest, AccountsModuleConfig } from '../modules';
+import { User } from '@accounts/types';
 import { ModuleConfig, ModuleSessionInfo } from '@graphql-modules/core';
 import { getClientIp } from 'request-ip';
 
-export const context = (moduleName: string) => async (
+import { AccountsRequest, AccountsModuleConfig } from '../modules';
+
+export interface AccountsContext<IUser = User> {
+  authToken?: string;
+  user?: IUser;
+  userId?: string;
+  error?: Error;
+  [key: string]: any;
+}
+
+interface RequestExtractorResult {
+  authToken?: string;
+  [key: string]: any;
+}
+
+export type RequestExtractor<T = any> = (
+  request: T,
+  session: ModuleSessionInfo,
+  moduleName: string
+) => Promise<RequestExtractorResult>;
+
+const accountsRequestExtractor: RequestExtractor<AccountsRequest> = async (
   { req }: AccountsRequest,
-  _: any,
-  { injector }: ModuleSessionInfo
+  { injector }: ModuleSessionInfo,
+  moduleName: string
 ) => {
   if (!req) {
     return {
@@ -18,15 +39,6 @@ export const context = (moduleName: string) => async (
   const headerName = config.headerName || 'Authorization';
   let authToken = (req.headers[headerName] || req.headers[headerName.toLowerCase()]) as string;
   authToken = authToken && authToken.replace('Bearer ', '');
-  let user;
-
-  if (authToken && !config.excludeAddUserInContext) {
-    try {
-      user = await config.accountsServer.resumeSession(authToken);
-    } catch (error) {
-      // Empty catch
-    }
-  }
 
   let userAgent: string = (req.headers['user-agent'] as string) || '';
   if (req.headers['x-ucbrowser-ua']) {
@@ -38,7 +50,28 @@ export const context = (moduleName: string) => async (
     authToken,
     userAgent,
     ip: getClientIp(req),
-    user,
-    userId: user && user.id,
   };
+};
+
+export const context = (
+  moduleName: string,
+  requestExtractor: RequestExtractor = accountsRequestExtractor
+) => async (request: any, _: any, session: ModuleSessionInfo): Promise<AccountsContext> => {
+  const res = await requestExtractor(request, session, moduleName);
+
+  if (res.authToken) {
+    const config: AccountsModuleConfig = session.injector.get(ModuleConfig(moduleName));
+
+    if (config.excludeAddUserInContext) {
+      return res;
+    }
+
+    try {
+      res.user = await config.accountsServer.resumeSession(res.authToken);
+    } catch (e) {
+      res.error = e;
+    }
+  }
+
+  return res;
 };

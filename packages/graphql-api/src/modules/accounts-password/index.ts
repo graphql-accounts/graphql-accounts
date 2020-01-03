@@ -7,7 +7,7 @@ import getMutationTypeDefs from './schema/mutation';
 import { Query } from './resolvers/query';
 import { Mutation } from './resolvers/mutation';
 import { AccountsRequest } from '../accounts';
-import { context } from '../../utils';
+import { context, RequestExtractor } from '../../utils';
 
 export interface AccountsPasswordModuleConfig {
   accountsServer: AccountsServer;
@@ -21,27 +21,34 @@ export interface AccountsPasswordModuleConfig {
   excludeAddUserInContext?: boolean;
 }
 
-export const AccountsPasswordModule = new GraphQLModule<
-  AccountsPasswordModuleConfig,
-  AccountsRequest
->({
-  name: 'accounts-password',
-  typeDefs: ({ config }) => [TypesTypeDefs, getQueryTypeDefs(config), getMutationTypeDefs(config)],
-  resolvers: ({ config }) =>
-    ({
-      [config.rootQueryName || 'Query']: Query,
-      [config.rootMutationName || 'Mutation']: Mutation,
-    } as any),
-  providers: ({ config }) => [
-    {
-      provide: AccountsServer,
-      useValue: config.accountsServer,
-    },
-    {
-      provide: AccountsPassword,
-      useValue: config.accountsPassword,
-    },
-  ],
-  context: context('accounts-password'),
-  configRequired: true,
-});
+export function accountsPasswordModuleFactory<T extends object = AccountsRequest>(
+  requestExtractor?: RequestExtractor<T>
+) {
+  return new GraphQLModule<AccountsPasswordModuleConfig, T>({
+    name: 'accounts-password',
+    typeDefs: ({ config }) => [
+      TypesTypeDefs,
+      getQueryTypeDefs(config),
+      getMutationTypeDefs(config),
+    ],
+    resolvers: ({ config }) =>
+      ({
+        [config.rootQueryName || 'Query']: Query,
+        [config.rootMutationName || 'Mutation']: Mutation,
+      } as any),
+    providers: ({ config }) => [
+      {
+        provide: AccountsServer,
+        useValue: config.accountsServer,
+      },
+      {
+        provide: AccountsPassword,
+        useValue: config.accountsPassword,
+      },
+    ],
+    context: context('accounts-password', requestExtractor),
+    configRequired: true,
+  });
+}
+
+export const AccountsPasswordModule = accountsPasswordModuleFactory();
