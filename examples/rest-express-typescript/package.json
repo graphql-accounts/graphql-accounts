@@ -11,13 +11,17 @@
   },
   "dependencies": {
     "@accounts/mongo": "^0.25.1",
+    "@accounts/oauth": "^0.25.1",
     "@accounts/password": "^0.25.1",
     "@accounts/rest-express": "^0.25.1",
     "@accounts/server": "^0.25.1",
+    "axios": "^0.19.2",
     "body-parser": "1.19.0",
     "cors": "2.8.5",
+    "dotenv": "^8.2.0",
     "express": "4.17.1",
     "mongoose": "5.8.3",
+    "qs": "^6.9.4",
     "tslib": "1.10.0"
   },
   "devDependencies": {

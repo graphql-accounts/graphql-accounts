@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -6,6 +8,7 @@ import { AccountsServer, ServerHooks } from '@accounts/server';
 import { AccountsPassword } from '@accounts/password';
 import accountsExpress, { userLoader } from '@accounts/rest-express';
 import MongoDBInterface from '@accounts/mongo';
+import { accountsOauth } from './oauth';
 
 mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/accounts-js-rest-example', {
   useNewUrlParser: true,
@@ -49,6 +52,7 @@ const accountsServer = new AccountsServer(
   },
   {
     password: accountsPassword,
+    oauth: accountsOauth,
   }
 );
 

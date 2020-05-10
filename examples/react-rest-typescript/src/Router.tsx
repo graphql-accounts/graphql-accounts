@@ -9,6 +9,7 @@ import ResetPassword from './ResetPassword';
 import VerifyEmail from './VerifyEmail';
 import { Email } from './Email';
 import { Security } from './Security';
+import { GoogleOAuthCallback } from './oauth/GoogleOAuthCallback';
 
 // A wrapper for <Route> that redirects to the login
 // screen if you're not yet authenticated.
@@ -56,6 +57,8 @@ const Router = () => {
         <Route exact path="/reset-password" component={ResetPassword} />
         <Route path="/reset-password/:token" component={ResetPassword} />
         <Route path="/verify-email/:token" component={VerifyEmail} />
+        
+        <Route path="/oauth-callbacks/google" component={GoogleOAuthCallback} />
       </AuthProvider>
     </BrowserRouter>
   );

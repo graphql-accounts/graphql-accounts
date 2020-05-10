@@ -16,6 +16,7 @@ import { useFormik, FormikErrors } from 'formik';
 import { SnackBarContentError } from './components/SnackBarContentError';
 import { useAuth } from './components/AuthContext';
 import { UnauthenticatedContainer } from './components/UnauthenticatedContainer';
+import { useGoogleLoginButton } from './oauth/useGoogleLoginButton';
 
 const useStyles = makeStyles(theme => ({
   cardContent: {
@@ -44,7 +45,7 @@ interface LoginValues {
   code: string;
 }
 
-const Login = ({ history }: RouteComponentProps<{}>) => {
+const Login: React.FC<RouteComponentProps<{}>> = ({ history }) => {
   const classes = useStyles();
   const { loginWithService } = useAuth();
   const [error, setError] = useState<string | undefined>();
@@ -80,6 +81,8 @@ const Login = ({ history }: RouteComponentProps<{}>) => {
       }
     },
   });
+
+  const renderGoogleLoginButton = useGoogleLoginButton(() => { history.push('/')});
 
   return (
     <UnauthenticatedContainer>
@@ -151,6 +154,9 @@ const Login = ({ history }: RouteComponentProps<{}>) => {
                 >
                   Sign in
                 </Button>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                { renderGoogleLoginButton() }
               </Grid>
               <Grid item xs={12} md={6}>
                 <Grid container justify="flex-end" alignContent="center">
