@@ -16,7 +16,7 @@
     "@accounts/password": "^0.27.0",
     "@accounts/rest-express": "^0.27.0",
     "@accounts/server": "^0.27.0",
-    "@graphql-modules/core": "0.7.16",
+    "@graphql-modules/core": "0.7.17",
     "@graphql-toolkit/schema-merging": "0.10.6",
     "apollo-server": "2.14.4",
     "graphql": "14.6.0",

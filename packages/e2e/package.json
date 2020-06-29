@@ -43,7 +43,7 @@
     "@accounts/server": "^0.27.0",
     "@accounts/typeorm": "^0.27.0",
     "@accounts/types": "^0.27.0",
-    "@graphql-modules/core": "0.7.16",
+    "@graphql-modules/core": "0.7.17",
     "apollo-boost": "0.4.8",
     "apollo-server": "2.14.4",
     "body-parser": "1.19.0",

@@ -37,7 +37,7 @@
     "@graphql-codegen/typescript-operations": "1.13.5",
     "@graphql-codegen/typescript-resolvers": "1.13.5",
     "@graphql-codegen/typescript-type-graphql": "1.13.5",
-    "@graphql-modules/core": "0.7.16",
+    "@graphql-modules/core": "0.7.17",
     "@types/jest": "25.2.1",
     "@types/request-ip": "0.0.35",
     "concurrently": "5.2.0",
@@ -51,7 +51,7 @@
     "@accounts/password": "^0.19.0",
     "@accounts/server": "^0.19.0",
     "@accounts/types": "^0.19.0",
-    "@graphql-modules/core": "0.7.14",
+    "@graphql-modules/core": "0.7.17",
     "graphql-tag": "^2.10.0",
     "graphql-tools": "^5.0.0"
   },

@@ -1,0 +1,14 @@
+version: '3.6'
+services:
+  db-postgres-accounts:
+    image: postgres:latest
+    container_name: "mikro-orm_postgres"
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: accounts
+      SESSION_SECRET: 'very-secret'
+      POSTGRES_HOST_AUTH_METHOD: 'trust'

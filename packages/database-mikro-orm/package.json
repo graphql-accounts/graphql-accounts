@@ -1,0 +1,44 @@
+{
+  "name": "@accounts/mikro-orm",
+  "version": "0.27.0",
+  "description": "MikroORM adaptor for accounts",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib",
+    "start": "tsc --watch",
+    "precompile": "yarn clean",
+    "compile": "tsc",
+    "prepublishOnly": "yarn compile"
+  },
+  "files": [
+    "src",
+    "lib"
+  ],
+  "jest": {
+    "testEnvironment": "node",
+    "preset": "ts-jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accounts-js/accounts/tree/master/packages/database-mikro-orm"
+  },
+  "author": "Niccolò Belli <niccolo.belli@linuxsystems.it>",
+  "license": "MIT",
+  "devDependencies": {
+    "@accounts/database-tests": "^0.27.0",
+    "@types/jest": "25.2.1",
+    "@types/node": "13.13.5",
+    "mikro-orm": "^3.6.15",
+    "pg": "^8.1.0",
+    "jest": "26.0.1"
+  },
+  "dependencies": {
+    "@accounts/types": "^0.27.0",
+    "tslib": "1.11.2"
+  },
+  "peerDependencies": {
+    "mikro-orm": "^3.6.15",
+    "pg": "^8.1.0"
+  }
+}

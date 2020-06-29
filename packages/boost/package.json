@@ -27,7 +27,7 @@
     "@accounts/graphql-api": "^0.27.0",
     "@accounts/server": "^0.27.0",
     "@accounts/types": "^0.27.0",
-    "@graphql-modules/core": "0.7.16",
+    "@graphql-modules/core": "0.7.17",
     "apollo-server": "^2.9.3",
     "graphql": "^14.5.4",
     "graphql-tools": "^5.0.0",
