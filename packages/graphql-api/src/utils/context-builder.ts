@@ -1,6 +1,7 @@
 import { ModuleConfig, ModuleSessionInfo } from '@graphql-modules/core';
 import { getClientIp } from 'request-ip';
 import { AccountsRequest, AccountsModuleConfig } from '../modules';
+import { AccountsServer } from '@accounts/server';
 
 export const context = (moduleName: string) => async (
   { req }: AccountsRequest,
@@ -26,7 +27,7 @@ export const context = (moduleName: string) => async (
 
   if (authToken && !config.excludeAddUserInContext) {
     try {
-      user = await config.accountsServer.resumeSession(authToken);
+      user = await injector.get(AccountsServer).resumeSession(authToken);
     } catch (error) {
       // Empty catch
     }

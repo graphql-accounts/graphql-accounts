@@ -1,7 +1,7 @@
 import { ModuleContext } from '@graphql-modules/core';
 import { CreateUserServicePassword } from '@accounts/types';
 import { AccountsPassword, CreateUserErrors } from '@accounts/password';
-import { AccountsServer, AccountsJsError } from '@accounts/server';
+import { AccountsServer, AccountsJsError, AuthenticationServices } from '@accounts/server';
 import { AccountsModuleContext } from '../../accounts';
 import { MutationResolvers } from '../../../models';
 
@@ -12,7 +12,10 @@ export const Mutation: MutationResolvers<ModuleContext<AccountsModuleContext>> =
     }
 
     const userId = user.id;
-    await injector.get(AccountsPassword).addEmail(userId, newEmail);
+    await (injector.get(AuthenticationServices).password as AccountsPassword).addEmail(
+      userId,
+      newEmail
+    );
     return null;
   },
   changePassword: async (_, { oldPassword, newPassword }, { user, injector }) => {
@@ -21,13 +24,17 @@ export const Mutation: MutationResolvers<ModuleContext<AccountsModuleContext>> =
     }
 
     const userId = user.id;
-    await injector.get(AccountsPassword).changePassword(userId, oldPassword, newPassword);
+    await (injector.get(AuthenticationServices).password as AccountsPassword).changePassword(
+      userId,
+      oldPassword,
+      newPassword
+    );
     return null;
   },
   createUser: async (_, { user }, ctx) => {
     const { injector, infos } = ctx;
     const accountsServer = injector.get(AccountsServer);
-    const accountsPassword = injector.get(AccountsPassword);
+    const accountsPassword = injector.get(AuthenticationServices).password as AccountsPassword;
 
     let userId: string;
 
@@ -75,7 +82,11 @@ export const Mutation: MutationResolvers<ModuleContext<AccountsModuleContext>> =
 
     const userId = user.id;
 
-    await injector.get(AccountsPassword).twoFactor.set(userId, secret as any, code);
+    await (injector.get(AuthenticationServices).password as AccountsPassword).twoFactor.set(
+      userId,
+      secret as any,
+      code
+    );
     return null;
   },
   twoFactorUnset: async (_, { code }, { user, injector }) => {
@@ -86,22 +97,32 @@ export const Mutation: MutationResolvers<ModuleContext<AccountsModuleContext>> =
 
     const userId = user.id;
 
-    await injector.get(AccountsPassword).twoFactor.unset(userId, code);
+    await (injector.get(AuthenticationServices).password as AccountsPassword).twoFactor.unset(
+      userId,
+      code
+    );
     return null;
   },
   resetPassword: async (_, { token, newPassword }, { injector, infos }) => {
-    return injector.get(AccountsPassword).resetPassword(token, newPassword, infos);
+    return (injector.get(AuthenticationServices).password as AccountsPassword).resetPassword(
+      token,
+      newPassword,
+      infos
+    );
   },
   sendResetPasswordEmail: async (_, { email }, { injector }) => {
-    await injector.get(AccountsPassword).sendResetPasswordEmail(email);
+    await (injector.get(AuthenticationServices)
+      .password as AccountsPassword).sendResetPasswordEmail(email);
     return null;
   },
   verifyEmail: async (_, { token }, { injector }) => {
-    await injector.get(AccountsPassword).verifyEmail(token);
+    await (injector.get(AuthenticationServices).password as AccountsPassword).verifyEmail(token);
     return null;
   },
   sendVerificationEmail: async (_, { email }, { injector }) => {
-    await injector.get(AccountsPassword).sendVerificationEmail(email);
+    await (injector.get(AuthenticationServices).password as AccountsPassword).sendVerificationEmail(
+      email
+    );
     return null;
   },
 };

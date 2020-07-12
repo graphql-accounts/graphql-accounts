@@ -1,6 +1,5 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { AccountsPassword } from '@accounts/password';
-import { AccountsServer } from '@accounts/server';
 import TypesTypeDefs from './schema/types';
 import getQueryTypeDefs from './schema/query';
 import getMutationTypeDefs from './schema/mutation';
@@ -9,10 +8,11 @@ import { Mutation } from './resolvers/mutation';
 import { AccountsRequest } from '../accounts';
 import { context } from '../../utils';
 import { CoreAccountsModule } from '../core';
+import { ProviderScope } from '@graphql-modules/di';
 
 export interface AccountsPasswordModuleConfig {
-  accountsServer: AccountsServer;
-  accountsPassword: AccountsPassword;
+  ctorParams: ConstructorParameters<typeof AccountsPassword>;
+  scope?: ProviderScope;
   rootQueryName?: string;
   rootMutationName?: string;
   extendTypeDefs?: boolean;
@@ -22,10 +22,10 @@ export interface AccountsPasswordModuleConfig {
   excludeAddUserInContext?: boolean;
 }
 
-export const AccountsPasswordModule = new GraphQLModule<
+export const AccountsPasswordModule: GraphQLModule<
   AccountsPasswordModuleConfig,
   AccountsRequest
->({
+> = new GraphQLModule<AccountsPasswordModuleConfig, AccountsRequest>({
   name: 'accounts-password',
   typeDefs: ({ config }) => [TypesTypeDefs, getQueryTypeDefs(config), getMutationTypeDefs(config)],
   resolvers: ({ config }) =>
@@ -33,21 +33,7 @@ export const AccountsPasswordModule = new GraphQLModule<
       [config.rootQueryName || 'Query']: Query,
       [config.rootMutationName || 'Mutation']: Mutation,
     } as any),
-  imports: ({ config }) => [
-    CoreAccountsModule.forRoot({
-      userAsInterface: config.userAsInterface,
-    }),
-  ],
-  providers: ({ config }) => [
-    {
-      provide: AccountsServer,
-      useValue: config.accountsServer,
-    },
-    {
-      provide: AccountsPassword,
-      useValue: config.accountsPassword,
-    },
-  ],
+  imports: [CoreAccountsModule],
   context: context('accounts-password'),
   configRequired: true,
 });

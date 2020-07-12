@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { User, DatabaseInterface } from '@accounts/types';
+import { User } from '@accounts/types';
 import { EmailTemplatesType } from './email-templates-type';
 import { UserObjectSanitizerFunction } from './user-object-sanitizer-function';
 import { ResumeSessionValidator } from './resume-session-validator';
@@ -9,11 +9,11 @@ import { TokenCreator } from './token-creator';
 import { JwtData } from './jwt-data';
 
 export interface AccountsServerOptions<CustomUser extends User = User> {
+  micro?: boolean;
   /**
    * Return ambiguous error messages from login failures to prevent user enumeration. Defaults to true.
    */
   ambiguousErrorMessages?: boolean;
-  db?: DatabaseInterface<CustomUser>;
   tokenSecret:
     | string
     | {

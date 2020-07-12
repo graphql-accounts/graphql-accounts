@@ -1,0 +1,40 @@
+{
+  "name": "@examples/graphql-mikro-orm-typescript",
+  "private": true,
+  "version": "0.27.0",
+  "main": "lib/index.js",
+  "license": "Unlicensed",
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm-config.ts",
+      "./lib/mikro-orm-config.js"
+    ]
+  },
+  "scripts": {
+    "start-only": "NODE_ENV=development nodemon -w src -x ts-node src/index.ts",
+    "start": "yarn start-only",
+    "start-services": "docker-compose up -d",
+    "build": "tsc",
+    "test": "yarn build"
+  },
+  "dependencies": {
+    "@accounts/graphql-api": "^0.27.0",
+    "@accounts/mikro-orm": "^0.27.0",
+    "@accounts/password": "^0.27.0",
+    "@accounts/server": "^0.27.0",
+    "@graphql-modules/core": "0.7.17",
+    "@graphql-toolkit/schema-merging": "0.10.6",
+    "apollo-server": "2.13.0",
+    "graphql": "14.6.0",
+    "mikro-orm": "^3.6.15",
+    "pg": "^8.1.0"
+  },
+  "devDependencies": {
+    "@accounts/types": "^0.27.0",
+    "@types/node": "13.13.5",
+    "nodemon": "2.0.3",
+    "ts-node": "8.10.1",
+    "typescript": "3.8.3"
+  }
+}

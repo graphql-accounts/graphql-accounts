@@ -1,10 +1,9 @@
 import { DatabaseManager } from '@accounts/database-manager';
 import { AccountsModule, authenticated } from '@accounts/graphql-api';
-import { AccountsServer, AccountsServerOptions } from '@accounts/server';
+import { AccountsServerOptions } from '@accounts/server';
 import { AuthenticationService } from '@accounts/types';
 import { ApolloServer } from 'apollo-server';
-import { verify } from 'jsonwebtoken';
-import { get, isString, merge } from 'lodash';
+import { get, merge } from 'lodash';
 
 export { AccountsModule };
 
@@ -65,7 +64,8 @@ export const accountsBoost = async (userOptions?: AccountsBoostOptions): Promise
     throw new Error('A database package could not be loaded. Did you install one?');
   }
 
-  options.db = new DatabaseManager({
+  // FIXME (boost needs to be fixed yet)
+  (options as any).db = new DatabaseManager({
     userStorage: storage,
     sessionStorage: storage,
   });
@@ -105,17 +105,15 @@ const defaultAccountsBoostListenOptions: AccountsBoostListenOptions = {
 };
 
 export class AccountsBoost {
-  public accountsServer: AccountsServer;
   public apolloServer: ApolloServer;
   public accountsGraphQL: typeof AccountsModule;
-  private options: AccountsBoostOptions;
 
   constructor(options: AccountsBoostOptions, services: { [key: string]: AuthenticationService }) {
-    this.accountsServer = new AccountsServer(options, services);
-    this.options = options;
+    // FIXME (boost needs to be fixed yet)
     this.accountsGraphQL = AccountsModule.forRoot({
-      accountsServer: this.accountsServer,
-    });
+      ...options,
+      services,
+    } as any);
 
     const { schema, context } = this.accountsGraphQL;
 
@@ -137,34 +135,6 @@ export class AccountsBoost {
 
   public graphql(): typeof AccountsModule {
     // Cache `this.accountsGraphQL` to avoid regenerating the schema if the user calls `accountsBoost.graphql()` multple times.
-    if (this.accountsGraphQL) {
-      return this.accountsGraphQL;
-    }
-
-    if (this.options.micro) {
-      this.accountsServer.resumeSession = async (accessToken: string) => {
-        let decoded: any;
-
-        if (!isString(accessToken)) {
-          throw new Error('An access token is required');
-        }
-
-        try {
-          const secretOrPublicKey =
-            typeof this.options.tokenSecret === 'string'
-              ? this.options.tokenSecret
-              : this.options.tokenSecret.publicKey;
-          decoded = verify(accessToken, secretOrPublicKey);
-        } catch (err) {
-          throw new Error('Access token is not valid');
-        }
-
-        return {
-          id: decoded.data.userId,
-        } as any;
-      };
-    }
-
     return this.accountsGraphQL;
   }
 }

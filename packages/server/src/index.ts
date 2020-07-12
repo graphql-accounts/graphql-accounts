@@ -1,4 +1,4 @@
-import { AccountsServer } from './accounts-server';
+import { AccountsServer, AuthenticationServices } from './accounts-server';
 export { AccountsServerOptions } from './types/accounts-server-options';
 export { generateRandomToken } from './utils/tokens';
 export { getFirstUserEmail } from './utils/get-first-user-email';
@@ -15,4 +15,4 @@ export {
 } from './errors';
 
 export default AccountsServer;
-export { AccountsServer };
+export { AccountsServer, AuthenticationServices };

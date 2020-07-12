@@ -2,6 +2,7 @@ import { QueryResolvers } from '../../../models';
 import { ModuleContext } from '@graphql-modules/core';
 import { AccountsModuleContext } from '../../accounts';
 import { AccountsPassword } from '@accounts/password';
+import { AuthenticationServices } from '@accounts/server';
 
 export const Query: QueryResolvers<ModuleContext<AccountsModuleContext>> = {
   twoFactorSecret: async (_, args, ctx) => {
@@ -13,7 +14,8 @@ export const Query: QueryResolvers<ModuleContext<AccountsModuleContext>> = {
     }
 
     // https://github.com/speakeasyjs/speakeasy/blob/master/index.js#L517
-    const secret = injector.get(AccountsPassword).twoFactor.getNewAuthSecret();
+    const secret = (injector.get(AuthenticationServices)
+      .password as AccountsPassword).twoFactor.getNewAuthSecret();
     return secret;
   },
 };

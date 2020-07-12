@@ -1,5 +1,5 @@
 import { pick, omit, isString, merge } from 'lodash';
-import * as jwt from 'jsonwebtoken';
+import { verify, Secret } from 'jsonwebtoken';
 import Emittery from 'emittery';
 import {
   User,
@@ -12,6 +12,7 @@ import {
   DatabaseInterface,
   AuthenticationService,
   ConnectionInformations,
+  DbInterface,
 } from '@accounts/types';
 
 import { generateAccessToken, generateRefreshToken, generateRandomToken } from './utils/tokens';
@@ -33,6 +34,12 @@ import {
   LogoutErrors,
   ResumeSessionErrors,
 } from './errors';
+import { Inject } from '@graphql-modules/di';
+import { ModuleConfig } from '@graphql-modules/core';
+
+export class AuthenticationServices<CustomUser extends User = User> {
+  [key: string]: AuthenticationService<CustomUser> | undefined;
+}
 
 const defaultOptions = {
   ambiguousErrorMessages: true,
@@ -55,18 +62,15 @@ const defaultOptions = {
 
 export class AccountsServer<CustomUser extends User = User> {
   public options: AccountsServerOptions<CustomUser> & typeof defaultOptions;
-  private services: { [key: string]: AuthenticationService<CustomUser> };
-  private db: DatabaseInterface<CustomUser>;
   private hooks: Emittery;
 
   constructor(
+    @Inject(ModuleConfig('accounts-core'))
     options: AccountsServerOptions<CustomUser>,
-    services: { [key: string]: AuthenticationService<CustomUser> }
+    @Inject(AuthenticationServices) private services: AuthenticationServices<CustomUser>,
+    @Inject(DbInterface) private db: DatabaseInterface<CustomUser>
   ) {
     this.options = merge({ ...defaultOptions }, options);
-    if (!this.options.db) {
-      throw new Error('A database driver is required');
-    }
     if (this.options.tokenSecret === defaultOptions.tokenSecret) {
       console.log(`
 You are using the default secret "${this.options.tokenSecret}" which is not secure.
@@ -79,20 +83,17 @@ Please set ambiguousErrorMessages to false to be able to use autologin.`
       );
     }
 
-    this.services = services || {};
-    this.db = this.options.db;
-
     // Set the db to all services
     for (const service in this.services) {
-      this.services[service].setStore(this.db);
-      this.services[service].server = this;
+      this.services[service]!.setStore(this.db);
+      this.services[service]!.server = this;
     }
 
     // Initialize hooks
     this.hooks = new Emittery();
   }
 
-  public getServices(): { [key: string]: AuthenticationService } {
+  public getServices(): AuthenticationServices<CustomUser> {
     return this.services;
   }
 
@@ -144,7 +145,7 @@ Please set ambiguousErrorMessages to false to be able to use autologin.`
         );
       }
 
-      const user: CustomUser | null = await this.services[serviceName].authenticate(params);
+      const user: CustomUser | null = await this.services[serviceName]!.authenticate(params);
       hooksInfo.user = user;
       if (!user) {
         throw new AccountsJsError(
@@ -191,7 +192,7 @@ Please set ambiguousErrorMessages to false to be able to use autologin.`
         );
       }
 
-      const user: CustomUser | null = await this.services[serviceName].authenticate(params);
+      const user: CustomUser | null = await this.services[serviceName]!.authenticate(params);
       hooksInfo.user = user;
       if (!user) {
         throw new AccountsJsError(
@@ -357,8 +358,8 @@ Please set ambiguousErrorMessages to false to be able to use autologin.`
 
       let sessionToken: string;
       try {
-        jwt.verify(refreshToken, this.getSecretOrPublicKey());
-        const decodedAccessToken = jwt.verify(accessToken, this.getSecretOrPublicKey(), {
+        verify(refreshToken, this.getSecretOrPublicKey());
+        const decodedAccessToken = verify(accessToken, this.getSecretOrPublicKey(), {
           ignoreExpiration: true,
         }) as { data: JwtData };
         sessionToken = decodedAccessToken.data.token;
@@ -474,39 +475,61 @@ Please set ambiguousErrorMessages to false to be able to use autologin.`
    * @throws {@link ResumeSessionErrors}
    */
   public async resumeSession(accessToken: string): Promise<CustomUser> {
-    try {
-      const session: Session = await this.findSessionByAccessToken(accessToken);
+    if (this.options.micro) {
+      let decoded: any;
 
-      if (session.valid) {
-        const user = await this.db.findUserById(session.userId);
-
-        if (!user) {
-          throw new AccountsJsError('User not found', ResumeSessionErrors.UserNotFound);
-        }
-
-        if (this.options.resumeSessionValidator) {
-          try {
-            await this.options.resumeSessionValidator(user, session);
-          } catch (e) {
-            throw new Error(e);
-          }
-        }
-
-        this.hooks.emit(ServerHooks.ResumeSessionSuccess, { user, accessToken });
-
-        return this.sanitizeUser(user);
+      if (!isString(accessToken)) {
+        throw new Error('An access token is required');
       }
 
-      this.hooks.emit(
-        ServerHooks.ResumeSessionError,
-        new AccountsJsError('Invalid Session', ResumeSessionErrors.InvalidSession)
-      );
+      try {
+        const secretOrPublicKey =
+          typeof this.options.tokenSecret === 'string'
+            ? this.options.tokenSecret
+            : this.options.tokenSecret.publicKey;
+        decoded = verify(accessToken, secretOrPublicKey);
+      } catch (err) {
+        throw new Error('Access token is not valid');
+      }
 
-      throw new AccountsJsError('Invalid Session', ResumeSessionErrors.InvalidSession);
-    } catch (e) {
-      this.hooks.emit(ServerHooks.ResumeSessionError, e);
+      return {
+        id: decoded.data.userId,
+      } as any;
+    } else {
+      try {
+        const session: Session = await this.findSessionByAccessToken(accessToken);
 
-      throw e;
+        if (session.valid) {
+          const user = await this.db.findUserById(session.userId);
+
+          if (!user) {
+            throw new AccountsJsError('User not found', ResumeSessionErrors.UserNotFound);
+          }
+
+          if (this.options.resumeSessionValidator) {
+            try {
+              await this.options.resumeSessionValidator(user, session);
+            } catch (e) {
+              throw new Error(e);
+            }
+          }
+
+          this.hooks.emit(ServerHooks.ResumeSessionSuccess, { user, accessToken });
+
+          return this.sanitizeUser(user);
+        }
+
+        this.hooks.emit(
+          ServerHooks.ResumeSessionError,
+          new AccountsJsError('Invalid Session', ResumeSessionErrors.InvalidSession)
+        );
+
+        throw new AccountsJsError('Invalid Session', ResumeSessionErrors.InvalidSession);
+      } catch (e) {
+        this.hooks.emit(ServerHooks.ResumeSessionError, e);
+
+        throw e;
+      }
     }
   }
 
@@ -526,7 +549,7 @@ Please set ambiguousErrorMessages to false to be able to use autologin.`
 
     let sessionToken: string;
     try {
-      const decodedAccessToken = jwt.verify(accessToken, this.getSecretOrPublicKey()) as {
+      const decodedAccessToken = verify(accessToken, this.getSecretOrPublicKey()) as {
         data: JwtData;
       };
       sessionToken = decodedAccessToken.data.token;
@@ -640,13 +663,13 @@ Please set ambiguousErrorMessages to false to be able to use autologin.`
       : { data };
   }
 
-  private getSecretOrPublicKey(): jwt.Secret {
+  private getSecretOrPublicKey(): Secret {
     return typeof this.options.tokenSecret === 'string'
       ? this.options.tokenSecret
       : this.options.tokenSecret.publicKey;
   }
 
-  private getSecretOrPrivateKey(): jwt.Secret {
+  private getSecretOrPrivateKey(): Secret {
     return typeof this.options.tokenSecret === 'string'
       ? this.options.tokenSecret
       : this.options.tokenSecret.privateKey;

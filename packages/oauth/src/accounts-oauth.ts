@@ -9,21 +9,21 @@ const getRegistrationPayloadDefault = async (oauthUser: OAuthUser) => {
   };
 };
 
-export class AccountsOauth implements AuthenticationService {
+export class AccountsOauth<CustomUser extends User = User> implements AuthenticationService {
   public server!: AccountsServer;
   public serviceName = 'oauth';
-  private db!: DatabaseInterface;
+  private db!: DatabaseInterface<CustomUser>;
   private options: OAuthOptions;
 
   constructor(options: OAuthOptions) {
     this.options = options;
   }
 
-  public setStore(store: DatabaseInterface) {
+  public setStore(store: DatabaseInterface<CustomUser>) {
     this.db = store;
   }
 
-  public async authenticate(params: any): Promise<User | null> {
+  public async authenticate(params: any): Promise<CustomUser | null> {
     if (!params.provider || !this.options[params.provider]) {
       throw new Error('Invalid provider');
     }
@@ -49,7 +49,7 @@ export class AccountsOauth implements AuthenticationService {
 
         const userId = await this.db.createUser(userData);
 
-        user = (await this.db.findUserById(userId)) as User;
+        user = (await this.db.findUserById(userId)) as CustomUser;
 
         if (this.server) {
           await this.server.getHooks().emit(ServerHooks.CreateUserSuccess, user);

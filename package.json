@@ -44,6 +44,11 @@
     "trailingComma": "es5",
     "printWidth": 100
   },
+  "resolutions": {
+    "@types/react": "16.9.36",
+    "graphql": "14.6.0",
+    "mikro-orm": "^3.6.15"
+  },
   "renovate": {
     "extends": [
       "config:base",
