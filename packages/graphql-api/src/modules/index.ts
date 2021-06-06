@@ -1,2 +1,2 @@
-export * from './accounts';
-export * from './accounts-password';
+export * from './core';
+export * from './password';

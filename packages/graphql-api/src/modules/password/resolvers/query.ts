@@ -1,9 +1,7 @@
-import { QueryResolvers } from '../../../models';
-import { ModuleContext } from '@graphql-modules/core';
-import { AccountsModuleContext } from '../../accounts';
 import { AccountsPassword } from '@accounts/password';
+import { QueryResolvers } from '../../../models';
 
-export const Query: QueryResolvers<ModuleContext<AccountsModuleContext>> = {
+export const Query: QueryResolvers<GraphQLModules.Context> = {
   twoFactorSecret: async (_, args, ctx) => {
     const { user, injector } = ctx;
 

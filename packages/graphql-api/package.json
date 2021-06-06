@@ -36,12 +36,10 @@
     "@accounts/password": "^0.32.0",
     "@accounts/server": "^0.32.0 || ^0.33.0",
     "@accounts/types": "^0.32.0",
-    "@graphql-modules/core": "0.7.17",
-    "graphql": "^14.6.0 || ^15.0.0",
-    "graphql-tag": "^2.10.0"
+    "graphql-modules": "^1.0.0",
+    "graphql": "^14.6.0 || ^15.0.0"
   },
   "dependencies": {
-    "@graphql-tools/merge": "6.2.13",
     "@graphql-tools/utils": "7.9.0",
     "request-ip": "2.1.3",
     "tslib": "2.1.0"
@@ -57,10 +55,10 @@
     "@graphql-codegen/typescript-operations": "1.17.16",
     "@graphql-codegen/typescript-resolvers": "1.19.1",
     "@graphql-codegen/typescript-type-graphql": "1.18.4",
-    "@graphql-modules/core": "0.7.17",
     "@types/jest": "26.0.23",
     "@types/request-ip": "0.0.35",
     "graphql": "14.6.0",
+    "graphql-modules": "1.4.2",
     "jest": "26.6.3",
     "ts-jest": "26.5.6",
     "ts-node": "9.1.1"

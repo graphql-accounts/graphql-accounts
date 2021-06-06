@@ -1,5 +1,5 @@
 import { AccountsServer } from '@accounts/server';
-import { Mutation } from '../../../../src/modules/accounts/resolvers/mutation';
+import { Mutation } from '../../../../src/modules/core/resolvers/mutation';
 
 describe('accounts resolvers mutation', () => {
   const accountsServerMock = {

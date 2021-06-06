@@ -1,7 +1,8 @@
-import gql from 'graphql-tag';
-import { AccountsModuleConfig } from '..';
+import { gql } from 'graphql-modules';
+import { CoreModuleConfig } from '..';
 
-export default (config: AccountsModuleConfig) => gql`
+export default (config: CoreModuleConfig) =>
+  gql(`
   ${config.extendTypeDefs ? 'extend' : ''} type ${config.rootMutationName || 'Mutation'} {
     impersonate(accessToken: String!, impersonated: ImpersonationUserIdentityInput!): ImpersonateReturn
     refreshTokens(accessToken: String!, refreshToken: String!): LoginResult
@@ -12,4 +13,4 @@ export default (config: AccountsModuleConfig) => gql`
     authenticate(serviceName: String!, params: AuthenticateParamsInput!): LoginResult
     verifyAuthentication(serviceName: String!, params: AuthenticateParamsInput!): Boolean
   }
-`;
+`);

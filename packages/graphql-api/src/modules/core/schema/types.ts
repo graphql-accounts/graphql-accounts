@@ -1,7 +1,31 @@
-import gql from 'graphql-tag';
+import { gql } from 'graphql-modules';
+import { CoreModuleConfig } from '..';
 
-export default gql`
+export default ({ userAsInterface }: CoreModuleConfig) =>
+  gql(`
   directive @auth on FIELD_DEFINITION | OBJECT
+
+  ${userAsInterface ? 'interface' : 'type'} User {
+    id: ID!
+    emails: [EmailRecord!]
+    username: String
+  }
+
+  type EmailRecord {
+    address: String
+    verified: Boolean
+  }
+  
+  type Tokens {
+    refreshToken: String
+    accessToken: String
+  }
+
+  type LoginResult {
+    sessionId: String
+    tokens: Tokens
+    user: User
+  }
 
   type ImpersonateReturn {
     authorized: Boolean
@@ -35,4 +59,4 @@ export default gql`
     username: String
     email: String
   }
-`;
+`);

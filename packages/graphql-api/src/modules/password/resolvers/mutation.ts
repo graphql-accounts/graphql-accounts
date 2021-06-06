@@ -1,4 +1,3 @@
-import { ModuleContext } from '@graphql-modules/core';
 import { CreateUserServicePassword } from '@accounts/types';
 import {
   AccountsPassword,
@@ -7,10 +6,9 @@ import {
   SendVerificationEmailErrors,
 } from '@accounts/password';
 import { AccountsServer, AccountsJsError } from '@accounts/server';
-import { AccountsModuleContext } from '../../accounts';
 import { MutationResolvers } from '../../../models';
 
-export const Mutation: MutationResolvers<ModuleContext<AccountsModuleContext>> = {
+export const Mutation: MutationResolvers<GraphQLModules.Context> = {
   addEmail: async (_, { newEmail }, { user, injector }) => {
     if (!(user && user.id)) {
       throw new Error('Unauthorized');

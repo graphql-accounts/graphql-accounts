@@ -1,4 +1,4 @@
-import { Query } from '../../../../src/modules/accounts/resolvers/query';
+import { Query } from '../../../../src/modules/core/resolvers/query';
 
 describe('accounts resolvers query', () => {
   const user = { id: 'idTest' };

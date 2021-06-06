@@ -1,17 +1,6 @@
-import gql from 'graphql-tag';
+import { gql } from 'graphql-modules';
 
 export default gql`
-  type Tokens {
-    refreshToken: String
-    accessToken: String
-  }
-
-  type LoginResult {
-    sessionId: String
-    tokens: Tokens
-    user: User
-  }
-
   type CreateUserResult {
     # Will be returned only if ambiguousErrorMessages is set to false.
     userId: ID

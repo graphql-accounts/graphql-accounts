@@ -5,7 +5,7 @@ import {
   SendVerificationEmailErrors,
 } from '@accounts/password';
 import { LoginResult } from '@accounts/types';
-import { Mutation } from '../../../../src/modules/accounts-password/resolvers/mutation';
+import { Mutation } from '../../../../src/modules/password/resolvers/mutation';
 import { CreateUserInput } from '../../../../src';
 
 describe('accounts-password resolvers mutation', () => {

@@ -1,5 +1,5 @@
 import { AccountsPassword } from '@accounts/password';
-import { Query } from '../../../../src/modules/accounts-password/resolvers/query';
+import { Query } from '../../../../src/modules/password/resolvers/query';
 
 describe('accounts-password resolvers query', () => {
   const accountsPasswordMock = {

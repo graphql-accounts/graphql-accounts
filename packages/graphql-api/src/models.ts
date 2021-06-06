@@ -64,6 +64,11 @@ export type LoginResult = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  impersonate?: Maybe<ImpersonateReturn>;
+  refreshTokens?: Maybe<LoginResult>;
+  logout?: Maybe<Scalars['Boolean']>;
+  authenticate?: Maybe<LoginResult>;
+  verifyAuthentication?: Maybe<Scalars['Boolean']>;
   createUser?: Maybe<CreateUserResult>;
   verifyEmail?: Maybe<Scalars['Boolean']>;
   resetPassword?: Maybe<LoginResult>;
@@ -73,11 +78,30 @@ export type Mutation = {
   changePassword?: Maybe<Scalars['Boolean']>;
   twoFactorSet?: Maybe<Scalars['Boolean']>;
   twoFactorUnset?: Maybe<Scalars['Boolean']>;
-  impersonate?: Maybe<ImpersonateReturn>;
-  refreshTokens?: Maybe<LoginResult>;
-  logout?: Maybe<Scalars['Boolean']>;
-  authenticate?: Maybe<LoginResult>;
-  verifyAuthentication?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type MutationImpersonateArgs = {
+  accessToken: Scalars['String'];
+  impersonated: ImpersonationUserIdentityInput;
+};
+
+
+export type MutationRefreshTokensArgs = {
+  accessToken: Scalars['String'];
+  refreshToken: Scalars['String'];
+};
+
+
+export type MutationAuthenticateArgs = {
+  serviceName: Scalars['String'];
+  params: AuthenticateParamsInput;
+};
+
+
+export type MutationVerifyAuthenticationArgs = {
+  serviceName: Scalars['String'];
+  params: AuthenticateParamsInput;
 };
 
 
@@ -128,34 +152,10 @@ export type MutationTwoFactorUnsetArgs = {
   code: Scalars['String'];
 };
 
-
-export type MutationImpersonateArgs = {
-  accessToken: Scalars['String'];
-  impersonated: ImpersonationUserIdentityInput;
-};
-
-
-export type MutationRefreshTokensArgs = {
-  accessToken: Scalars['String'];
-  refreshToken: Scalars['String'];
-};
-
-
-export type MutationAuthenticateArgs = {
-  serviceName: Scalars['String'];
-  params: AuthenticateParamsInput;
-};
-
-
-export type MutationVerifyAuthenticationArgs = {
-  serviceName: Scalars['String'];
-  params: AuthenticateParamsInput;
-};
-
 export type Query = {
   __typename?: 'Query';
-  twoFactorSecret?: Maybe<TwoFactorSecretKey>;
   getUser?: Maybe<User>;
+  twoFactorSecret?: Maybe<TwoFactorSecretKey>;
 };
 
 export type Tokens = {
@@ -266,43 +266,43 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
-  TwoFactorSecretKey: ResolverTypeWrapper<TwoFactorSecretKey>;
-  String: ResolverTypeWrapper<Scalars['String']>;
   User: ResolverTypeWrapper<User>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   EmailRecord: ResolverTypeWrapper<EmailRecord>;
+  String: ResolverTypeWrapper<Scalars['String']>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  TwoFactorSecretKey: ResolverTypeWrapper<TwoFactorSecretKey>;
   Mutation: ResolverTypeWrapper<{}>;
-  CreateUserInput: CreateUserInput;
-  CreateUserResult: ResolverTypeWrapper<CreateUserResult>;
-  LoginResult: ResolverTypeWrapper<LoginResult>;
-  Tokens: ResolverTypeWrapper<Tokens>;
-  TwoFactorSecretKeyInput: TwoFactorSecretKeyInput;
   ImpersonationUserIdentityInput: ImpersonationUserIdentityInput;
   ImpersonateReturn: ResolverTypeWrapper<ImpersonateReturn>;
+  Tokens: ResolverTypeWrapper<Tokens>;
+  LoginResult: ResolverTypeWrapper<LoginResult>;
   AuthenticateParamsInput: AuthenticateParamsInput;
   UserInput: UserInput;
+  CreateUserInput: CreateUserInput;
+  CreateUserResult: ResolverTypeWrapper<CreateUserResult>;
+  TwoFactorSecretKeyInput: TwoFactorSecretKeyInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {};
-  TwoFactorSecretKey: TwoFactorSecretKey;
-  String: Scalars['String'];
   User: User;
   ID: Scalars['ID'];
   EmailRecord: EmailRecord;
+  String: Scalars['String'];
   Boolean: Scalars['Boolean'];
+  TwoFactorSecretKey: TwoFactorSecretKey;
   Mutation: {};
-  CreateUserInput: CreateUserInput;
-  CreateUserResult: CreateUserResult;
-  LoginResult: LoginResult;
-  Tokens: Tokens;
-  TwoFactorSecretKeyInput: TwoFactorSecretKeyInput;
   ImpersonationUserIdentityInput: ImpersonationUserIdentityInput;
   ImpersonateReturn: ImpersonateReturn;
+  Tokens: Tokens;
+  LoginResult: LoginResult;
   AuthenticateParamsInput: AuthenticateParamsInput;
   UserInput: UserInput;
+  CreateUserInput: CreateUserInput;
+  CreateUserResult: CreateUserResult;
+  TwoFactorSecretKeyInput: TwoFactorSecretKeyInput;
 };
 
 export type AuthDirectiveArgs = {  };
@@ -336,6 +336,11 @@ export type LoginResultResolvers<ContextType = any, ParentType extends Resolvers
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  impersonate?: Resolver<Maybe<ResolversTypes['ImpersonateReturn']>, ParentType, ContextType, RequireFields<MutationImpersonateArgs, 'accessToken' | 'impersonated'>>;
+  refreshTokens?: Resolver<Maybe<ResolversTypes['LoginResult']>, ParentType, ContextType, RequireFields<MutationRefreshTokensArgs, 'accessToken' | 'refreshToken'>>;
+  logout?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  authenticate?: Resolver<Maybe<ResolversTypes['LoginResult']>, ParentType, ContextType, RequireFields<MutationAuthenticateArgs, 'serviceName' | 'params'>>;
+  verifyAuthentication?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationVerifyAuthenticationArgs, 'serviceName' | 'params'>>;
   createUser?: Resolver<Maybe<ResolversTypes['CreateUserResult']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'user'>>;
   verifyEmail?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationVerifyEmailArgs, 'token'>>;
   resetPassword?: Resolver<Maybe<ResolversTypes['LoginResult']>, ParentType, ContextType, RequireFields<MutationResetPasswordArgs, 'token' | 'newPassword'>>;
@@ -345,16 +350,11 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   changePassword?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationChangePasswordArgs, 'oldPassword' | 'newPassword'>>;
   twoFactorSet?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationTwoFactorSetArgs, 'secret' | 'code'>>;
   twoFactorUnset?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationTwoFactorUnsetArgs, 'code'>>;
-  impersonate?: Resolver<Maybe<ResolversTypes['ImpersonateReturn']>, ParentType, ContextType, RequireFields<MutationImpersonateArgs, 'accessToken' | 'impersonated'>>;
-  refreshTokens?: Resolver<Maybe<ResolversTypes['LoginResult']>, ParentType, ContextType, RequireFields<MutationRefreshTokensArgs, 'accessToken' | 'refreshToken'>>;
-  logout?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  authenticate?: Resolver<Maybe<ResolversTypes['LoginResult']>, ParentType, ContextType, RequireFields<MutationAuthenticateArgs, 'serviceName' | 'params'>>;
-  verifyAuthentication?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationVerifyAuthenticationArgs, 'serviceName' | 'params'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  twoFactorSecret?: Resolver<Maybe<ResolversTypes['TwoFactorSecretKey']>, ParentType, ContextType>;
   getUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  twoFactorSecret?: Resolver<Maybe<ResolversTypes['TwoFactorSecretKey']>, ParentType, ContextType>;
 };
 
 export type TokensResolvers<ContextType = any, ParentType extends ResolversParentTypes['Tokens'] = ResolversParentTypes['Tokens']> = {
