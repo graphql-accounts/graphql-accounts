@@ -1,13 +1,20 @@
-import { AccountsModuleConfig } from '..';
 import gql from 'graphql-tag';
 
-export default (config: AccountsModuleConfig) =>
-  config.withSchemaDefinition
+export default ({
+  rootQueryName,
+  rootMutationName,
+  withSchemaDefinition,
+}: {
+  rootQueryName?: string;
+  rootMutationName?: string;
+  withSchemaDefinition?: boolean;
+}) =>
+  withSchemaDefinition
     ? [
         gql`
     schema {
-        query: ${config.rootMutationName || 'Query'}
-        mutation: ${config.rootQueryName || 'Mutation'}
+        query: ${rootMutationName || 'Query'}
+        mutation: ${rootQueryName || 'Mutation'}
     }
 `,
       ]

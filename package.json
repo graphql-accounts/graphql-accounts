@@ -80,6 +80,7 @@
     "prettier": "2.2.0",
     "typescript": "3.9.5"
   },
+  "resolutions": {},
   "collective": {
     "type": "opencollective",
     "url": "https://opencollective.com/accounts-js",

@@ -1,8 +1,13 @@
 import gql from 'graphql-tag';
-import { AccountsPasswordModuleConfig } from '..';
 
-export default (config: AccountsPasswordModuleConfig) => gql`
-  ${config.extendTypeDefs ? 'extend' : ''} type ${config.rootQueryName || 'Query'} {
+export default ({
+  rootQueryName,
+  extendTypeDefs = true,
+}: {
+  rootQueryName?: string;
+  extendTypeDefs?: boolean;
+}) => gql`
+  ${extendTypeDefs ? 'extend' : ''} type ${rootQueryName || 'Query'} {
         twoFactorSecret: TwoFactorSecretKey
     }
 `;

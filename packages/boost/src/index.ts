@@ -1,12 +1,18 @@
 import { DatabaseManager } from '@accounts/database-manager';
-import { AccountsModule, authenticated } from '@accounts/graphql-api';
+import {
+  createAccountsCoreModule,
+  createAccountsPasswordModule,
+  authenticated,
+  context,
+} from '@accounts/graphql-api';
 import { AccountsServer, AccountsServerOptions } from '@accounts/server';
 import { AuthenticationService } from '@accounts/types';
 import { ApolloServer } from 'apollo-server';
 import { verify } from 'jsonwebtoken';
 import { get, isString, merge } from 'lodash';
+import { Application, createApplication } from 'graphql-modules';
 
-export { AccountsModule };
+export { createAccountsCoreModule, createAccountsPasswordModule };
 
 export { AccountsServerOptions };
 
@@ -107,21 +113,29 @@ const defaultAccountsBoostListenOptions: AccountsBoostListenOptions = {
 export class AccountsBoost {
   public accountsServer: AccountsServer;
   public apolloServer: ApolloServer;
-  public accountsGraphQL: typeof AccountsModule;
+  public accountsGraphQL: Application;
   private options: AccountsBoostOptions;
 
   constructor(options: AccountsBoostOptions, services: { [key: string]: AuthenticationService }) {
     this.accountsServer = new AccountsServer(options, services);
     this.options = options;
-    this.accountsGraphQL = AccountsModule.forRoot({
-      accountsServer: this.accountsServer,
+    this.accountsGraphQL = createApplication({
+      modules: [createAccountsCoreModule({ accountsServer: this.accountsServer })],
     });
 
-    const { schema, context } = this.accountsGraphQL;
+    const { schema } = this.accountsGraphQL;
 
     this.apolloServer = new ApolloServer({
       schema,
-      context,
+      context: ({ req, connection }) => {
+        return context(
+          { req, connection },
+          {
+            accountsServer: this.accountsServer,
+          }
+        );
+      },
+      //schemaDirectives
     });
   }
 
@@ -135,7 +149,7 @@ export class AccountsBoost {
     return res;
   }
 
-  public graphql(): typeof AccountsModule {
+  public graphql(): Application {
     // Cache `this.accountsGraphQL` to avoid regenerating the schema if the user calls `accountsBoost.graphql()` multple times.
     if (this.accountsGraphQL) {
       return this.accountsGraphQL;

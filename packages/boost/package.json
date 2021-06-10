@@ -31,9 +31,9 @@
     "@accounts/graphql-api": "^0.32.0",
     "@accounts/server": "^0.32.0",
     "@accounts/types": "^0.32.0",
-    "@graphql-modules/core": "0.7.17",
     "apollo-server": "^2.9.3",
     "graphql": "14.6.0",
+    "graphql-modules": "1.4.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "tslib": "2.1.0"

@@ -1,8 +1,13 @@
 import gql from 'graphql-tag';
-import { AccountsPasswordModuleConfig } from '..';
 
-export default (config: AccountsPasswordModuleConfig) => gql`
-  ${config.extendTypeDefs ? 'extend' : ''} type ${config.rootMutationName || 'Mutation'} {
+export default ({
+  rootMutationName,
+  extendTypeDefs = true,
+}: {
+  rootMutationName?: string;
+  extendTypeDefs?: boolean;
+}) => gql`
+  ${extendTypeDefs ? 'extend' : ''} type ${rootMutationName || 'Mutation'} {
     # Creates a user with a password, returns the id corresponding db ids, such as number IDs, ObjectIDs or UUIDs
     createUser(user: CreateUserInput!): CreateUserResult
     verifyEmail(token: String!): Boolean

@@ -1,8 +1,13 @@
 import gql from 'graphql-tag';
-import { AccountsModuleConfig } from '..';
 
-export default (config: AccountsModuleConfig) => gql`
-  ${config.extendTypeDefs ? 'extend' : ''} type ${config.rootMutationName || 'Mutation'} {
+export default ({
+  rootMutationName,
+  extendTypeDefs = false,
+}: {
+  rootMutationName?: string;
+  extendTypeDefs?: boolean;
+}) => gql`
+  ${extendTypeDefs ? 'extend' : ''} type ${rootMutationName || 'Mutation'} {
     impersonate(accessToken: String!, impersonated: ImpersonationUserIdentityInput!): ImpersonateReturn
     refreshTokens(accessToken: String!, refreshToken: String!): LoginResult
     logout: Boolean

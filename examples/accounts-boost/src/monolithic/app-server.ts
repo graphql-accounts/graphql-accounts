@@ -1,13 +1,13 @@
 import accountsBoost, { authenticated } from '@accounts/boost';
+import { AuthenticatedDirective, context } from '@accounts/graphql-api';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
 import { ApolloServer } from 'apollo-server';
 
 (async () => {
-  const accounts = (
-    await accountsBoost({
-      tokenSecret: 'terrible secret',
-    })
-  ).graphql();
+  const accounts = await accountsBoost({
+    tokenSecret: 'terrible secret',
+  });
+  const accountsApp = accounts.graphql();
 
   const typeDefs = `
     type PrivateType @auth {
@@ -46,13 +46,20 @@ import { ApolloServer } from 'apollo-server';
   };
 
   const apolloServer = new ApolloServer({
-    typeDefs: mergeTypeDefs([typeDefs, accounts.typeDefs]),
-    resolvers: mergeResolvers([accounts.resolvers, resolvers]),
+    typeDefs: mergeTypeDefs([typeDefs, ...accountsApp.typeDefs]),
+    resolvers: mergeResolvers([accountsApp.resolvers, resolvers]),
     schemaDirectives: {
       // In order for the `@auth` directive to work
-      ...accounts.schemaDirectives,
+      auth: AuthenticatedDirective,
     },
-    context: ({ req }) => accounts.context({ req }),
+    context: ({ req, connection }) => {
+      return context(
+        { req, connection },
+        {
+          accountsServer: accounts.accountsServer,
+        }
+      );
+    },
   } as any)
     .listen()
     .then((res) => {

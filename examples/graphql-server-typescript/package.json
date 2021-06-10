@@ -16,10 +16,10 @@
     "@accounts/password": "^0.32.0",
     "@accounts/rest-express": "^0.32.0",
     "@accounts/server": "^0.32.0",
-    "@graphql-modules/core": "0.7.17",
     "@graphql-tools/merge": "6.2.5",
     "apollo-server": "2.16.0",
     "graphql": "14.6.0",
+    "graphql-modules": "1.4.2",
     "mongoose": "5.9.25",
     "tslib": "2.1.0"
   },

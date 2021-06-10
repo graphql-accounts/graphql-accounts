@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
-import { CoreAccountsModuleConfig } from './index';
 
-export default ({ userAsInterface }: CoreAccountsModuleConfig) => gql`
+export default ({ userAsInterface }: { userAsInterface?: boolean }) => gql`
   ${userAsInterface ? 'interface' : 'type'} User {
     id: ID!
     emails: [EmailRecord!]

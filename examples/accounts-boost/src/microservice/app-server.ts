@@ -6,16 +6,17 @@ import { mergeSchemas } from '@graphql-tools/merge';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { introspectSchema, makeRemoteExecutableSchema } from '@graphql-tools/wrap';
 import fetch from 'node-fetch';
+import { AuthenticatedDirective, context } from '@accounts/graphql-api';
 
 const accountsServerUri = 'http://localhost:4003/';
 
 (async () => {
-  const accounts = (
-    await accountsBoost({
-      tokenSecret: 'terrible secret',
-      micro: true, // setting micro to true will instruct `@accounts/boost` to only verify access tokens without any additional session logic
-    })
-  ).graphql();
+  const accounts = await accountsBoost({
+    tokenSecret: 'terrible secret',
+    micro: true, // setting micro to true will instruct `@accounts/boost` to only verify access tokens without any additional session logic
+  });
+
+  const accountsApp = accounts.graphql();
 
   // // Note: the following steps are optional and only required if you want to stitch the remote accounts schema with your apps schema.
 
@@ -91,9 +92,19 @@ const accountsServerUri = 'http://localhost:4003/';
   const apolloServer = await new ApolloServer({
     schema: mergeSchemas({
       schemas: [executableLocalSchema, executableRemoteSchema],
-      schemaDirectives: accounts.schemaDirectives as any,
+      schemaDirectives: {
+        // In order for the `@auth` directive to work
+        auth: AuthenticatedDirective,
+      } as any,
     }),
-    context: ({ req }) => accounts.context({ req }),
+    context: ({ req, connection }) => {
+      return context(
+        { req, connection },
+        {
+          accountsServer: accounts.accountsServer,
+        }
+      );
+    },
   }).listen();
 
   console.log(`GraphQL server running at ${apolloServer.url}`);

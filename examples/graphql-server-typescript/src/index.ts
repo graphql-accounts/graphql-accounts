@@ -1,12 +1,17 @@
 import { DatabaseManager } from '@accounts/database-manager';
-import { AccountsModule } from '@accounts/graphql-api';
+import {
+  AuthenticatedDirective,
+  context,
+  createAccountsCoreModule,
+  createAccountsPasswordModule,
+} from '@accounts/graphql-api';
 import MongoDBInterface from '@accounts/mongo';
 import { AccountsPassword } from '@accounts/password';
 import { AccountsServer, ServerHooks } from '@accounts/server';
-import { ApolloServer, makeExecutableSchema } from 'apollo-server';
+import { ApolloServer, SchemaDirectiveVisitor } from 'apollo-server';
 import gql from 'graphql-tag';
-import { mergeResolvers, mergeTypeDefs } from '@graphql-tools/merge';
 import mongoose from 'mongoose';
+import { createApplication, createModule } from 'graphql-modules';
 
 const start = async () => {
   // Create database connection
@@ -56,11 +61,6 @@ const start = async () => {
     // If you throw an error here it will be returned to the client.
   });
 
-  // Creates resolvers, type definitions, and schema directives used by accounts-js
-  const accountsGraphQL = AccountsModule.forRoot({
-    accountsServer,
-  });
-
   const typeDefs = gql`
     type PrivateType @auth {
       field: String
@@ -77,17 +77,13 @@ const start = async () => {
       lastName: String!
     }
 
-    type Query {
+    extend type Query {
       # Example of how to get the userId from the context and return the current logged in user or null
       me: User
       publicField: String
       # You can only query this if you are logged in
       privateField: String @auth
       privateType: PrivateType
-    }
-
-    type Mutation {
-      _: String
     }
   `;
 
@@ -108,18 +104,32 @@ const start = async () => {
     },
   };
 
-  const schema = makeExecutableSchema({
-    typeDefs: mergeTypeDefs([typeDefs, accountsGraphQL.typeDefs]),
-    resolvers: mergeResolvers([accountsGraphQL.resolvers, resolvers]),
-    schemaDirectives: {
-      ...accountsGraphQL.schemaDirectives,
-    },
-  });
+  // Creates resolvers, type definitions, and schema directives used by accounts-js
+  const schema = createApplication({
+    modules: [
+      createAccountsCoreModule({ accountsServer }),
+      createAccountsPasswordModule({ accountsPassword }),
+      createModule({
+        id: 'myApp',
+        typeDefs,
+        resolvers,
+      }),
+    ],
+  }).createSchemaForApollo();
+
+  SchemaDirectiveVisitor.visitSchemaDirectives(schema, {
+    auth: AuthenticatedDirective,
+  } as any);
 
   // Create the Apollo Server that takes a schema and configures internal stuff
   const server = new ApolloServer({
     schema,
-    context: accountsGraphQL.context,
+    /*schemaDirectives: {
+      auth: AuthenticatedDirective,
+    } as any,*/
+    context: ({ req, connection }) => {
+      return context({ req, connection }, { accountsServer });
+    },
   });
 
   server.listen(4000).then(({ url }) => {

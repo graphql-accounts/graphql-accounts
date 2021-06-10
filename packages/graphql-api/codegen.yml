@@ -11,6 +11,7 @@ generates:
     config:
       noNamespaces: true
       noSchemaStitching: true
+      contextType: ./modules/accounts/#AccountsContextGraphQLModules
     plugins:
       - add:
           content: '/* eslint-disable */'

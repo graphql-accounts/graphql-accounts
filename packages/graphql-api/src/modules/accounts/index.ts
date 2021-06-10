@@ -1,8 +1,7 @@
-import { GraphQLModule } from '@graphql-modules/core';
+import { createModule } from 'graphql-modules';
 import { mergeTypeDefs } from '@graphql-tools/merge';
 import { User, ConnectionInformations } from '@accounts/types';
 import { AccountsServer } from '@accounts/server';
-import AccountsPassword from '@accounts/password';
 import { IncomingMessage } from 'http';
 import TypesTypeDefs from './schema/types';
 import getQueryTypeDefs from './schema/query';
@@ -10,29 +9,27 @@ import getMutationTypeDefs from './schema/mutation';
 import getSchemaDef from './schema/schema-def';
 import { Query } from './resolvers/query';
 import { Mutation } from './resolvers/mutation';
-import { User as UserResolvers } from './resolvers/user';
-import { AccountsPasswordModule } from '../accounts-password';
-import { AuthenticatedDirective } from '../../utils/authenticated-directive';
-import { context } from '../../utils';
-import { CoreAccountsModule } from '../core';
+import makeSchema from './schema/schema';
+//import { AuthenticatedDirective } from '../../utils/authenticated-directive';
+//import { context } from '../../utils';
 
 export interface AccountsRequest {
   req: IncomingMessage;
   connection?: any;
 }
 
-export interface AccountsModuleConfig {
+export interface AccountsCoreModuleConfig {
   accountsServer: AccountsServer;
   rootQueryName?: string;
   rootMutationName?: string;
   extendTypeDefs?: boolean;
   withSchemaDefinition?: boolean;
-  headerName?: string;
+  //headerName?: string;
   userAsInterface?: boolean;
-  excludeAddUserInContext?: boolean;
+  //excludeAddUserInContext?: boolean;
 }
 
-export interface AccountsModuleContext<IUser = User> {
+export interface AccountsContext<IUser = User> {
   authToken?: string;
   user?: IUser;
   userId?: string;
@@ -41,17 +38,15 @@ export interface AccountsModuleContext<IUser = User> {
   infos: ConnectionInformations;
 }
 
-// You can see the below. It is really easy to create a reusable GraphQL-Module with different configurations
+export type AccountsContextGraphQLModules<IUser = User> = AccountsContext<IUser> &
+  GraphQLModules.ModuleContext;
 
-export const AccountsModule: GraphQLModule<
-  AccountsModuleConfig,
-  AccountsRequest,
-  AccountsModuleContext
-> = new GraphQLModule<AccountsModuleConfig, AccountsRequest, AccountsModuleContext>({
-  name: 'accounts',
-  typeDefs: ({ config }) =>
-    mergeTypeDefs(
+export const createAccountsCoreModule = (config: AccountsCoreModuleConfig) =>
+  createModule({
+    id: 'accounts-core',
+    typeDefs: mergeTypeDefs(
       [
+        makeSchema(config),
         TypesTypeDefs,
         getQueryTypeDefs(config),
         getMutationTypeDefs(config),
@@ -61,35 +56,20 @@ export const AccountsModule: GraphQLModule<
         useSchemaDefinition: config.withSchemaDefinition,
       }
     ),
-  resolvers: ({ config }) =>
-    ({
+    resolvers: {
       [config.rootQueryName || 'Query']: Query,
       [config.rootMutationName || 'Mutation']: Mutation,
-      User: UserResolvers,
-    } as any),
-  // If necessary, import AccountsPasswordModule together with this module
-  imports: ({ config }) => [
-    CoreAccountsModule.forRoot({
-      userAsInterface: config.userAsInterface,
-    }),
-    ...(config.accountsServer.getServices().password
-      ? [
-          AccountsPasswordModule.forRoot({
-            accountsPassword: config.accountsServer.getServices().password as AccountsPassword,
-            ...config,
-          }),
-        ]
-      : []),
-  ],
-  providers: ({ config }) => [
-    {
-      provide: AccountsServer,
-      useValue: config.accountsServer,
     },
-  ],
-  context: context('accounts'),
-  schemaDirectives: {
-    auth: AuthenticatedDirective,
-  },
-  configRequired: true,
-});
+    providers: [
+      {
+        provide: AccountsServer,
+        useValue: config.accountsServer,
+        global: true,
+      },
+      // AccountsPassword
+    ],
+    //context: context('accounts'),
+    //schemaDirectives: {
+    //  auth: AuthenticatedDirective,
+    //},
+  });

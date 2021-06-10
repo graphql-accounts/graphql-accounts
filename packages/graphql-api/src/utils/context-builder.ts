@@ -1,11 +1,22 @@
-import { ModuleConfig, ModuleSessionInfo } from '@graphql-modules/core';
 import { getClientIp } from 'request-ip';
-import { AccountsRequest, AccountsModuleConfig } from '../modules';
+import { AccountsServer } from '@accounts/server';
+import { IncomingMessage } from 'http';
 
-export const context = (moduleName: string) => async (
-  { req, connection }: AccountsRequest,
-  _: any,
-  { injector }: ModuleSessionInfo
+interface AccountsContextOptions {
+  accountsServer: AccountsServer;
+  headerName?: string;
+  excludeAddUserInContext?: boolean;
+}
+
+export const context = async (
+  {
+    req,
+    connection,
+  }: {
+    req: IncomingMessage;
+    connection?: any;
+  },
+  options: AccountsContextOptions
 ) => {
   // If connection is set it means it's a websocket connection coming from apollo
   if (connection) {
@@ -23,15 +34,14 @@ export const context = (moduleName: string) => async (
     };
   }
 
-  const config: AccountsModuleConfig = injector.get(ModuleConfig(moduleName));
-  const headerName = config.headerName || 'Authorization';
+  const headerName = options.headerName || 'Authorization';
   let authToken = (req.headers[headerName] || req.headers[headerName.toLowerCase()]) as string;
   authToken = authToken && authToken.replace('Bearer ', '');
   let user;
 
-  if (authToken && !config.excludeAddUserInContext) {
+  if (authToken && !options.excludeAddUserInContext) {
     try {
-      user = await config.accountsServer.resumeSession(authToken);
+      user = await options.accountsServer.resumeSession(authToken);
     } catch (error) {
       // Empty catch
     }

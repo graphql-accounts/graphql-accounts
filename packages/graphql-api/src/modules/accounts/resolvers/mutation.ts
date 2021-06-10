@@ -1,9 +1,7 @@
-import { ModuleContext } from '@graphql-modules/core';
 import { AccountsServer } from '@accounts/server';
 import { MutationResolvers } from '../../../models';
-import { AccountsModuleContext } from '..';
 
-export const Mutation: MutationResolvers<ModuleContext<AccountsModuleContext>> = {
+export const Mutation: MutationResolvers = {
   authenticate: async (_, args, ctx) => {
     const { serviceName, params } = args;
     const { injector, infos } = ctx;

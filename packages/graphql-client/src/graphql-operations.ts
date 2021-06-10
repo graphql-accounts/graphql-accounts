@@ -63,6 +63,11 @@ export type LoginResult = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  impersonate?: Maybe<ImpersonateReturn>;
+  refreshTokens?: Maybe<LoginResult>;
+  logout?: Maybe<Scalars['Boolean']>;
+  authenticate?: Maybe<LoginResult>;
+  verifyAuthentication?: Maybe<Scalars['Boolean']>;
   createUser?: Maybe<CreateUserResult>;
   verifyEmail?: Maybe<Scalars['Boolean']>;
   resetPassword?: Maybe<LoginResult>;
@@ -72,11 +77,30 @@ export type Mutation = {
   changePassword?: Maybe<Scalars['Boolean']>;
   twoFactorSet?: Maybe<Scalars['Boolean']>;
   twoFactorUnset?: Maybe<Scalars['Boolean']>;
-  impersonate?: Maybe<ImpersonateReturn>;
-  refreshTokens?: Maybe<LoginResult>;
-  logout?: Maybe<Scalars['Boolean']>;
-  authenticate?: Maybe<LoginResult>;
-  verifyAuthentication?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type MutationImpersonateArgs = {
+  accessToken: Scalars['String'];
+  impersonated: ImpersonationUserIdentityInput;
+};
+
+
+export type MutationRefreshTokensArgs = {
+  accessToken: Scalars['String'];
+  refreshToken: Scalars['String'];
+};
+
+
+export type MutationAuthenticateArgs = {
+  serviceName: Scalars['String'];
+  params: AuthenticateParamsInput;
+};
+
+
+export type MutationVerifyAuthenticationArgs = {
+  serviceName: Scalars['String'];
+  params: AuthenticateParamsInput;
 };
 
 
@@ -127,34 +151,10 @@ export type MutationTwoFactorUnsetArgs = {
   code: Scalars['String'];
 };
 
-
-export type MutationImpersonateArgs = {
-  accessToken: Scalars['String'];
-  impersonated: ImpersonationUserIdentityInput;
-};
-
-
-export type MutationRefreshTokensArgs = {
-  accessToken: Scalars['String'];
-  refreshToken: Scalars['String'];
-};
-
-
-export type MutationAuthenticateArgs = {
-  serviceName: Scalars['String'];
-  params: AuthenticateParamsInput;
-};
-
-
-export type MutationVerifyAuthenticationArgs = {
-  serviceName: Scalars['String'];
-  params: AuthenticateParamsInput;
-};
-
 export type Query = {
   __typename?: 'Query';
-  twoFactorSecret?: Maybe<TwoFactorSecretKey>;
   getUser?: Maybe<User>;
+  twoFactorSecret?: Maybe<TwoFactorSecretKey>;
 };
 
 export type Tokens = {
