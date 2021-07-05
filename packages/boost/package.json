@@ -1,6 +1,6 @@
 {
   "name": "@accounts/boost",
-  "version": "0.32.0",
+  "version": "0.32.1",
   "description": "Ready to use GraphQL accounts server",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@accounts/database-manager": "^0.32.0",
-    "@accounts/graphql-api": "^0.32.0",
-    "@accounts/server": "^0.32.0",
+    "@accounts/graphql-api": "^0.32.1",
+    "@accounts/server": "^0.33.0",
     "@accounts/types": "^0.32.0",
     "@graphql-modules/core": "0.7.17",
     "apollo-server": "^2.9.3",

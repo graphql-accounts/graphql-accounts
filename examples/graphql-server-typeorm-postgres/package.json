@@ -12,9 +12,9 @@
     "test": "yarn build"
   },
   "dependencies": {
-    "@accounts/graphql-api": "^0.32.0",
+    "@accounts/graphql-api": "^0.32.1",
     "@accounts/password": "^0.32.0",
-    "@accounts/server": "^0.32.0",
+    "@accounts/server": "^0.33.0",
     "@accounts/typeorm": "^0.32.0",
     "@graphql-modules/core": "0.7.17",
     "@graphql-tools/merge": "6.2.5",
