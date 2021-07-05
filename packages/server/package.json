@@ -1,6 +1,6 @@
 {
   "name": "@accounts/server",
-  "version": "0.32.0",
+  "version": "0.33.0",
   "description": "Fullstack authentication and accounts-management",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
