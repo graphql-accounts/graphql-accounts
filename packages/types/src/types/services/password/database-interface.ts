@@ -22,7 +22,8 @@ export interface DatabaseInterfaceServicePassword<CustomUser extends User = User
     userId: string,
     email: string,
     token: string,
-    reason: string
+    reason: string,
+    expireAfterSeconds: number
   ): Promise<void>;
 
   addEmail(userId: string, newEmail: string, verified: boolean): Promise<void>;

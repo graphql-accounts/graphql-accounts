@@ -267,7 +267,13 @@ describe('Mongo', () => {
 
     it('should return user', async () => {
       const userId = await databaseTests.database.createUser(user);
-      await databaseTests.database.addResetPasswordToken(userId, 'john@doe.com', 'token', 'test');
+      await databaseTests.database.addResetPasswordToken(
+        userId,
+        'john@doe.com',
+        'token',
+        'test',
+        1000
+      );
       const ret = await databaseTests.database.findUserByResetPasswordToken('token');
       expect(ret).toBeTruthy();
       expect((ret as any)._id).toBeTruthy();
@@ -790,7 +796,13 @@ describe('Mongo', () => {
       const testToken = 'testVerificationToken';
       const testReason = 'testReason';
       const userId = await databaseTests.database.createUser(user);
-      await databaseTests.database.addResetPasswordToken(userId, user.email, testToken, testReason);
+      await databaseTests.database.addResetPasswordToken(
+        userId,
+        user.email,
+        testToken,
+        testReason,
+        1000
+      );
       const userWithTokens = await databaseTests.database.findUserByResetPasswordToken(testToken);
       expect(userWithTokens).toBeTruthy();
       await databaseTests.database.removeAllResetPasswordTokens(userId);
@@ -832,13 +844,19 @@ describe('Mongo', () => {
         idProvider: () => new ObjectId().toString(),
       });
       const userId = await mongoOptions.createUser(user);
-      await mongoOptions.addResetPasswordToken(userId, 'john@doe.com', 'token', 'reset');
+      await mongoOptions.addResetPasswordToken(userId, 'john@doe.com', 'token', 'reset', 1000);
     });
 
     it('should add a token', async () => {
       const userId = await databaseTests.database.createUser(user);
-      await databaseTests.database.addResetPasswordToken(userId, 'john@doe.com', 'token', 'reset');
-      const retUser = await databaseTests.database.findUserById(userId);
+      await databaseTests.database.addResetPasswordToken(
+        userId,
+        'john@doe.com',
+        'token',
+        'reset',
+        1000
+      );
+      const retUser = await databaseTests.database.findUserByResetPasswordToken('token');
       const services: any = retUser!.services;
       expect(services.password.reset.length).toEqual(1);
       expect(services.password.reset[0].address).toEqual('john@doe.com');

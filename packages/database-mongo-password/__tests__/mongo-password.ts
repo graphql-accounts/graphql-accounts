@@ -24,6 +24,7 @@ describe('MongoServicePassword', () => {
 
   beforeEach(async () => {
     await database.collection('users').deleteMany({});
+    await database.collection('resetPasswordTokens').deleteMany({});
   });
 
   afterAll(async () => {
@@ -49,15 +50,18 @@ describe('MongoServicePassword', () => {
     it('should create indexes', async () => {
       const mongoServicePassword = new MongoServicePassword({ database });
       await mongoServicePassword.setupIndexes();
-      const ret = await database.collection('users').indexInformation();
-      expect(ret).toEqual({
+      expect(await database.collection('users').indexInformation()).toEqual({
         _id_: [['_id', 1]],
         'emails.address_1': [['emails.address', 1]],
         'services.email.verificationTokens.token_1': [
           ['services.email.verificationTokens.token', 1],
         ],
-        'services.password.reset.token_1': [['services.password.reset.token', 1]],
         username_1: [['username', 1]],
+      });
+      expect(await database.collection('resetPasswordTokens').indexInformation()).toEqual({
+        _id_: [['_id', 1]],
+        expireAt_1: [['expireAt', 1]],
+        token_1: [['token', 1]],
       });
     });
   });
@@ -270,7 +274,13 @@ describe('MongoServicePassword', () => {
     it('should return user', async () => {
       const mongoServicePassword = new MongoServicePassword({ database });
       const userId = await mongoServicePassword.createUser(user);
-      await mongoServicePassword.addResetPasswordToken(userId, 'john@doe.com', 'token', 'test');
+      await mongoServicePassword.addResetPasswordToken(
+        userId,
+        'john@doe.com',
+        'token',
+        'test',
+        1000
+      );
       const ret = await mongoServicePassword.findUserByResetPasswordToken('token');
       expect(ret).toBeTruthy();
       expect((ret as any)._id).toBeTruthy();
@@ -505,7 +515,13 @@ describe('MongoServicePassword', () => {
       const testToken = 'testVerificationToken';
       const testReason = 'testReason';
       const userId = await mongoServicePassword.createUser(user);
-      await mongoServicePassword.addResetPasswordToken(userId, user.email, testToken, testReason);
+      await mongoServicePassword.addResetPasswordToken(
+        userId,
+        user.email,
+        testToken,
+        testReason,
+        1000
+      );
       const userWithTokens = await mongoServicePassword.findUserByResetPasswordToken(testToken);
       expect(userWithTokens).toBeTruthy();
       await mongoServicePassword.removeAllResetPasswordTokens(userId);
@@ -553,15 +569,21 @@ describe('MongoServicePassword', () => {
       });
       const userId = await mongoServicePassword.createUser(user);
       await expect(
-        mongoServicePassword.addResetPasswordToken(userId, 'john@doe.com', 'token', 'reset')
+        mongoServicePassword.addResetPasswordToken(userId, 'john@doe.com', 'token', 'reset', 1000)
       ).resolves.not.toThrowError();
     });
 
     it('should add a token', async () => {
       const mongoServicePassword = new MongoServicePassword({ database });
       const userId = await mongoServicePassword.createUser(user);
-      await mongoServicePassword.addResetPasswordToken(userId, 'john@doe.com', 'token', 'reset');
-      const retUser = await mongoServicePassword.findUserById(userId);
+      await mongoServicePassword.addResetPasswordToken(
+        userId,
+        'john@doe.com',
+        'token',
+        'reset',
+        1000
+      );
+      const retUser = await mongoServicePassword.findUserByResetPasswordToken('token');
       const services: any = retUser!.services;
       expect(services.password.reset.length).toEqual(1);
       expect(services.password.reset[0].address).toEqual('john@doe.com');

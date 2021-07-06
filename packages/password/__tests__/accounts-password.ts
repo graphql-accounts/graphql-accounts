@@ -574,7 +574,7 @@ describe('AccountsPassword', () => {
       } as any;
       set(password.server, 'options.emailTemplates', {});
       await password.sendResetPasswordEmail(email);
-      expect(addResetPasswordToken.mock.calls[0].length).toBe(4);
+      expect(addResetPasswordToken.mock.calls[0].length).toBe(5);
       expect(prepareMail.mock.calls[0].length).toBe(6);
       expect(sendMail.mock.calls[0].length).toBe(1);
     });
@@ -610,7 +610,7 @@ describe('AccountsPassword', () => {
       } as any;
       set(password.server, 'options.emailTemplates', {});
       await password.sendEnrollmentEmail(email);
-      expect(addResetPasswordToken.mock.calls[0].length).toBe(4);
+      expect(addResetPasswordToken.mock.calls[0].length).toBe(5);
       expect(prepareMail.mock.calls[0].length).toBe(6);
       expect(sendMail.mock.calls[0].length).toBe(1);
     });

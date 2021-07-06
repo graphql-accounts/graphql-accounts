@@ -3,7 +3,7 @@ import { CreateUserServicePassword, DatabaseInterfaceServicePassword, User } fro
 import { toMongoID } from './utils';
 
 export interface MongoUser {
-  _id?: string | object;
+  _id: string | object;
   username?: string;
   services: {
     password?: {
@@ -19,6 +19,16 @@ export interface MongoUser {
   [key: string]: any;
 }
 
+export interface MongoResetPasswordToken {
+  _id: string | object;
+  userId: string;
+  token: string;
+  address: string;
+  when: Date;
+  reason: string;
+  expireAt: Date;
+}
+
 export interface MongoServicePasswordOptions {
   /**
    * Mongo database object.
@@ -29,6 +39,16 @@ export interface MongoServicePasswordOptions {
    * Default 'users'.
    */
   userCollectionName?: string;
+  /**
+   * The password reset token collection name;
+   * Default 'resetPasswordTokens'.
+   */
+  resetPasswordTokenCollectionName?: string;
+  /**
+   * Should automatically delete the user reset password tokens when they expire via mongo TTL.
+   * Default to 'true'.
+   */
+  resetPasswordTokenTTL?: boolean;
   /**
    * The timestamps for the users collection.
    * Default 'createdAt' and 'updatedAt'.
@@ -60,6 +80,8 @@ export interface MongoServicePasswordOptions {
 
 const defaultOptions = {
   userCollectionName: 'users',
+  resetPasswordTokenCollectionName: 'resetPasswordTokens',
+  resetPasswordTokenTTL: true,
   timestamps: {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -76,6 +98,8 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
   private database: Db;
   // Mongo user collection
   private userCollection: Collection;
+  // Mongo password reset token collection
+  private resetPasswordTokenCollection: Collection<MongoResetPasswordToken>;
 
   constructor(options: MongoServicePasswordOptions) {
     this.options = {
@@ -86,6 +110,9 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
 
     this.database = this.options.database;
     this.userCollection = this.database.collection(this.options.userCollectionName);
+    this.resetPasswordTokenCollection = this.database.collection(
+      this.options.resetPasswordTokenCollectionName
+    );
   }
 
   /**
@@ -113,10 +140,16 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
       sparse: true,
     });
     // Token index used to verify a password reset request
-    await this.userCollection.createIndex('services.password.reset.token', {
+    await this.resetPasswordTokenCollection.createIndex('token', {
       ...options,
+      unique: true,
       sparse: true,
     });
+    if (this.options.resetPasswordTokenTTL) {
+      await this.resetPasswordTokenCollection.createIndex('expireAt', {
+        expireAfterSeconds: 0,
+      });
+    }
   }
 
   /**
@@ -129,7 +162,7 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
     email,
     ...cleanUser
   }: CreateUserServicePassword): Promise<string> {
-    const user: MongoUser = {
+    const user: Omit<MongoUser, '_id'> = {
       ...cleanUser,
       services: {
         password: {
@@ -227,11 +260,20 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
    * @param token Reset password token used to query the user.
    */
   public async findUserByResetPasswordToken(token: string): Promise<User | null> {
-    const user = await this.userCollection.findOne({
-      'services.password.reset.token': token,
-    });
+    const resetPasswordToken = await this.resetPasswordTokenCollection.findOne({ token });
+    if (!resetPasswordToken) {
+      return null;
+    }
+
+    const userId = this.options.convertUserIdToMongoObjectId
+      ? toMongoID(resetPasswordToken.userId)
+      : resetPasswordToken.userId;
+    const user = await this.userCollection.findOne({ _id: userId });
     if (user) {
       user.id = user._id.toString();
+      user.services.password.reset = [
+        { ...resetPasswordToken, when: resetPasswordToken.when.getTime() },
+      ];
     }
     return user;
   }
@@ -342,9 +384,6 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
           'services.password.bcrypt': newPassword,
           [this.options.timestamps.updatedAt]: this.options.dateProvider(),
         },
-        $unset: {
-          'services.password.reset': '',
-        },
       }
     );
     if (ret.result.nModified === 0) {
@@ -389,22 +428,19 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
     userId: string,
     email: string,
     token: string,
-    reason: string
+    reason: string,
+    expireAfterSeconds: number
   ): Promise<void> {
-    const _id = this.options.convertUserIdToMongoObjectId ? toMongoID(userId) : userId;
-    await this.userCollection.updateOne(
-      { _id },
-      {
-        $push: {
-          'services.password.reset': {
-            token,
-            address: email.toLowerCase(),
-            when: this.options.dateProvider(),
-            reason,
-          },
-        },
-      }
-    );
+    const now = new Date();
+    await this.resetPasswordTokenCollection.insertOne({
+      userId,
+      address: email.toLowerCase(),
+      token,
+      when: now,
+      reason,
+      // Set when the object should be removed by mongo TTL
+      expireAt: new Date(now.getTime() + expireAfterSeconds * 1000),
+    });
   }
 
   /**
@@ -412,14 +448,6 @@ export class MongoServicePassword implements DatabaseInterfaceServicePassword {
    * @param userId Id used to update the user.
    */
   public async removeAllResetPasswordTokens(userId: string): Promise<void> {
-    const id = this.options.convertUserIdToMongoObjectId ? toMongoID(userId) : userId;
-    await this.userCollection.updateOne(
-      { _id: id },
-      {
-        $unset: {
-          'services.password.reset': '',
-        },
-      }
-    );
+    await this.resetPasswordTokenCollection.deleteMany({ userId });
   }
 }

@@ -231,7 +231,7 @@ describe('DatabaseManager', () => {
   });
 
   it('addResetPasswordToken should be called on sessionStorage', () => {
-    expect(databaseManager.addResetPasswordToken('userId', 'email', 'token', 'reason')).toBe(
+    expect(databaseManager.addResetPasswordToken('userId', 'email', 'token', 'reason', 1000)).toBe(
       'userStorage'
     );
   });

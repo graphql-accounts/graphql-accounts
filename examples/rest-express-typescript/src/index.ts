@@ -42,9 +42,11 @@ const accountsPassword = new AccountsPassword({
   },
 });
 
+const accountsMongo = new Mongo(db);
+
 const accountsServer = new AccountsServer(
   {
-    db: new Mongo(db),
+    db: accountsMongo,
     tokenSecret: 'secret',
   },
   {
@@ -56,6 +58,11 @@ accountsServer.on(ServerHooks.ValidateLogin, ({ user }) => {
   // This hook is called every time a user try to login.
   // You can use it to only allow users with verified email to login.
   // If you throw an error here it will be returned to the client.
+});
+
+// Set the required mongodb indexes once connection is successful
+mongoose.connection.on('connected', async () => {
+  await accountsMongo.setupIndexes();
 });
 
 /**

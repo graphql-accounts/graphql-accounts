@@ -128,9 +128,16 @@ export class Mongo implements DatabaseInterface {
     userId: string,
     email: string,
     token: string,
-    reason: string
+    reason: string,
+    expireAfterSeconds: number
   ): Promise<void> {
-    return this.servicePassword.addResetPasswordToken(userId, email, token, reason);
+    return this.servicePassword.addResetPasswordToken(
+      userId,
+      email,
+      token,
+      reason,
+      expireAfterSeconds
+    );
   }
 
   public async createSession(
