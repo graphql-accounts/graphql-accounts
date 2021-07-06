@@ -1,0 +1,79 @@
+{
+  "name": "@accounts/nestjs",
+  "version": "0.19.0",
+  "description": "NestJS AccountsJS module and utilities",
+  "main": "lib/index.js",
+  "files": [
+    "dist/*",
+    "index.js",
+    "index.ts",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "clean": "rimraf lib",
+    "preCompile": "yarn clean",
+    "compile": "tsc -p tsconfig.json",
+    "format": "prettier **/**/*.ts --ignore-path ./.prettierignore --write",
+    "precommit": "lint-staged",
+    "prepublishOnly": "yarn compile",
+    "test:e2e": "jest --config ./__tests__/jest-e2e.json",
+    "pretest:examples": "yarn compile",
+    "test:examples": "cd examples && tsc && jest --config ./jest-e2e.json --runInBand",
+    "test:examples:debug": "cd examples && tsc && node --inspect-brk ../node_modules/.bin/jest --config ./jest-e2e.json --runInBand"
+  },
+  "author": "Nick Bolles <me@nickbolles.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@accounts/client-password": "^0.19.0",
+    "@accounts/graphql-client": "^0.19.0",
+    "@accounts/password": "^0.19.0",
+    "@accounts/types": "^0.19.0",
+    "@graphql-modules/core": "^0.7.13",
+    "@nestjs/common": "^6.8.3",
+    "@nestjs/core": "^6.8.3",
+    "@nestjs/graphql": "^6.5.3",
+    "@nestjs/platform-express": "^6.8.3",
+    "@nestjs/testing": "^6.8.3",
+    "@types/gravatar": "^1.8.0",
+    "@types/jest": "24.0.18",
+    "@types/node": "12.7.3",
+    "@types/shelljs": "^0.8.5",
+    "@types/supertest": "^2.0.8",
+    "apollo-server-express": "^2.7.0",
+    "apollo-server-testing": "^2.9.4",
+    "graphql": "^14.5.8",
+    "gravatar": "^1.8.0",
+    "husky": "3.0.5",
+    "jest": "24.9.0",
+    "jest-summarizing-reporter": "^1.1.2",
+    "lint-staged": "9.2.5",
+    "nest-router": "^1.0.9",
+    "nestjs-config": "^1.4.4",
+    "prettier": "1.18.2",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.0",
+    "shelljs": "^0.8.3",
+    "supertest": "^4.0.2",
+    "ts-jest": "24.0.2",
+    "ts-node": "^8.4.1",
+    "type-graphql": "^0.17.4",
+    "typescript": "^3.6.4"
+  },
+  "peerDependencies": {
+    "@accounts/password": "~0.19.0",
+    "@graphql-modules/core": "^0.7.10",
+    "@nestjs/core": "~6.7.0",
+    "reflect-metadata": "~0.1.12"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --ignore-path ./.prettierignore --write",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "@accounts/graphql-api": "0.*",
+    "@accounts/rest-express": "0.*",
+    "@accounts/server": "0.*"
+  }
+}
