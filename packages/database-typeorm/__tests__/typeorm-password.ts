@@ -62,11 +62,9 @@ describe('TypeormServicePassword', () => {
           },
         ],
         services: {
-          password: [
-            {
-              bcrypt: 'toto',
-            },
-          ],
+          password: {
+            bcrypt: 'toto',
+          },
         },
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
@@ -81,12 +79,10 @@ describe('TypeormServicePassword', () => {
       });
       const ret = await accountsTypeorm.findUserById(userId);
       expect(userId).toBeTruthy();
-      expect(ret!.services).toMatchObject({
-        password: [
-          {
-            bcrypt: 'toto',
-          },
-        ],
+      expect(ret!.services).toEqual({
+        password: {
+          bcrypt: 'toto',
+        },
       });
     });
 
@@ -270,7 +266,7 @@ describe('TypeormServicePassword', () => {
       const ret = await accountsTypeorm.findPasswordHash(userId);
       const services: any = retUser!.services;
       expect(ret).toBeTruthy();
-      expect(ret).toEqual(services.password[0].bcrypt);
+      expect(ret).toEqual(services.password.bcrypt);
     });
   });
 
@@ -409,8 +405,8 @@ describe('TypeormServicePassword', () => {
       await accountsTypeorm.setPassword(userId, newPassword);
       const retUser = await accountsTypeorm.findUserById(userId);
       const services: any = retUser!.services;
-      expect(services.password[0].bcrypt).toBeTruthy();
-      expect(services.password[0].bcrypt).toEqual(newPassword);
+      expect(services.password.bcrypt).toBeTruthy();
+      expect(services.password.bcrypt).toEqual(newPassword);
       expect(retUser!.createdAt).not.toEqual(retUser!.updatedAt);
     });
   });
