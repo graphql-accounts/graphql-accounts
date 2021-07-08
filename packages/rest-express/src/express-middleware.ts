@@ -17,6 +17,7 @@ import { addEmail } from './endpoints/password/add-email';
 import { userLoader } from './user-loader';
 import { AccountsExpressOptions } from './types';
 import { getUserAgent } from './utils/get-user-agent';
+import { requestMagicLinkEmail } from './endpoints/magic-link/request-magic-link-email';
 
 const defaultOptions: AccountsExpressOptions = {
   path: '/accounts',
@@ -102,6 +103,11 @@ const accountsExpress = (
       userLoader(accountsServer),
       twoFactorUnset(accountsServer)
     );
+  }
+
+  // @accounts/magic-link
+  if (services.magicLink) {
+    router.post(`${path}/magiclink/requestMagicLinkEmail`, requestMagicLinkEmail(accountsServer));
   }
 
   // @accounts/oauth

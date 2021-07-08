@@ -30,9 +30,10 @@
   "license": "MIT",
   "dependencies": {
     "@accounts/mongo-password": "^0.32.0",
+    "@accounts/mongo-magic-link": "^0.32.0",
     "@accounts/mongo-sessions": "^0.32.0",
     "@accounts/types": "^0.32.0",
-    "@types/mongodb": "^3.5.33",
+    "@types/mongodb": "^3.6.18",
     "mongodb": "^3.4.1",
     "tslib": "2.1.0"
   },

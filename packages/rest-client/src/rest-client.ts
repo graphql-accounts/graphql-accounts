@@ -242,6 +242,16 @@ export class RestClient implements TransportInterface {
     };
     return this.authFetch('password/twoFactorUnset', args, customHeaders);
   }
+
+  public requestMagicLinkEmail(email: string, customHeaders?: object): Promise<void> {
+    const args = {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+      }),
+    };
+    return this.fetch('magiclink/requestMagicLinkEmail', args, customHeaders);
+  }
 }
 
 export default RestClient;

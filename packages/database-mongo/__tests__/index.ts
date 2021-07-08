@@ -275,6 +275,22 @@ describe('Mongo', () => {
     });
   });
 
+  describe('findUserByLoginToken', () => {
+    it('should return null for not found user', async () => {
+      const ret = await databaseTests.database.findUserByLoginToken('token');
+      expect(ret).not.toBeTruthy();
+    });
+
+    it('should return user', async () => {
+      const userId = await databaseTests.database.createUser(user);
+      await databaseTests.database.addLoginToken(userId, 'john@doe.com', 'token');
+      const ret = await databaseTests.database.findUserByLoginToken('token');
+      expect(ret).toBeTruthy();
+      expect((ret as any)._id).toBeTruthy();
+      expect(ret!.id).toBeTruthy();
+    });
+  });
+
   describe('findUserByServiceId', () => {
     it('should return null for not found user', async () => {
       const ret = await databaseTests.database.findUserByServiceId('facebook', 'invalid');
@@ -801,6 +817,28 @@ describe('Mongo', () => {
     });
   });
 
+  describe('removeAllLoginTokens', () => {
+    // eslint-disable-next-line jest/expect-expect
+    it('should not convert id', async () => {
+      const mongoOptions = new Mongo(databaseTests.db, {
+        convertUserIdToMongoObjectId: false,
+      });
+      const userId = await mongoOptions.createUser(user);
+      await mongoOptions.removeAllLoginTokens(userId);
+    });
+
+    it('should remove the login tokens', async () => {
+      const testToken = 'testVerificationToken';
+      const userId = await databaseTests.database.createUser(user);
+      await databaseTests.database.addLoginToken(userId, user.email, testToken);
+      const userWithTokens = await databaseTests.database.findUserByLoginToken(testToken);
+      expect(userWithTokens).toBeTruthy();
+      await databaseTests.database.removeAllLoginTokens(userId);
+      const userWithDeletedTokens = await databaseTests.database.findUserByLoginToken(testToken);
+      expect(userWithDeletedTokens).not.toBeTruthy();
+    });
+  });
+
   describe('addEmailVerificationToken', () => {
     // eslint-disable-next-line jest/expect-expect
     it('should not convert id', async () => {
@@ -845,6 +883,29 @@ describe('Mongo', () => {
       expect(services.password.reset[0].token).toEqual('token');
       expect(services.password.reset[0].when).toBeTruthy();
       expect(services.password.reset[0].reason).toEqual('reset');
+    });
+  });
+
+  describe('addLoginToken', () => {
+    // eslint-disable-next-line jest/expect-expect
+    it('should not convert id', async () => {
+      const mongoOptions = new Mongo(databaseTests.db, {
+        convertUserIdToMongoObjectId: false,
+        idProvider: () => new ObjectId().toString(),
+      });
+      const userId = await mongoOptions.createUser(user);
+      await mongoOptions.addLoginToken(userId, 'john@doe.com', 'token');
+    });
+
+    it('should add a token', async () => {
+      const userId = await databaseTests.database.createUser(user);
+      await databaseTests.database.addLoginToken(userId, 'john@doe.com', 'token');
+      const retUser = await databaseTests.database.findUserById(userId);
+      const services: any = retUser!.services;
+      expect(services.magicLink.loginTokens.length).toEqual(1);
+      expect(services.magicLink.loginTokens[0].address).toEqual('john@doe.com');
+      expect(services.magicLink.loginTokens[0].token).toEqual('token');
+      expect(services.magicLink.loginTokens[0].when).toBeTruthy();
     });
   });
 

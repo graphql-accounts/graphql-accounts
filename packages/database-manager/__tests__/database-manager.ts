@@ -107,6 +107,18 @@ export default class Database {
   public setUserDeactivated() {
     return this.name;
   }
+
+  public findUserByLoginToken() {
+    return this.name;
+  }
+
+  public addLoginToken() {
+    return this.name;
+  }
+
+  public removeAllLoginTokens() {
+    return this.name;
+  }
 }
 
 const databaseManager = new DatabaseManager({
@@ -242,5 +254,17 @@ describe('DatabaseManager', () => {
 
   it('removeAllResetPasswordTokens should be called on userStorage', () => {
     expect(databaseManager.removeAllResetPasswordTokens('userId')).toBe('userStorage');
+  });
+
+  it('addLoginToken should be called on userStorage', () => {
+    expect(databaseManager.addLoginToken('userId', 'email', 'token')).toBe('userStorage');
+  });
+
+  it('removeAllLoginTokens should be called on userStorage', () => {
+    expect(databaseManager.removeAllLoginTokens('userId')).toBe('userStorage');
+  });
+
+  it('findUserByLoginToken should be called on userStorage', () => {
+    expect(databaseManager.findUserByLoginToken('token')).toBe('userStorage');
   });
 });

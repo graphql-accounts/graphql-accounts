@@ -25,6 +25,7 @@ import {
   GetUserDocument,
   ImpersonateDocument,
   AuthenticateDocument,
+  RequestMagicLinkEmailDocument,
 } from './graphql-operations';
 import { GraphQLErrorList } from './GraphQLErrorList';
 import { replaceUserFieldsFragment } from './utils/replace-user-fragment';
@@ -269,5 +270,12 @@ export default class GraphQLClient implements TransportInterface {
     }
 
     return data[resultField];
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public async requestMagicLinkEmail(email: string): Promise<void> {
+    return this.mutate(RequestMagicLinkEmailDocument, 'requestMagicLinkEmail', { email });
   }
 }

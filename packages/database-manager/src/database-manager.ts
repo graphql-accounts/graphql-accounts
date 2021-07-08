@@ -154,4 +154,19 @@ export class DatabaseManager implements DatabaseInterface {
   public get setUserDeactivated(): DatabaseInterface['setUserDeactivated'] {
     return this.userStorage.setUserDeactivated.bind(this.userStorage);
   }
+
+  // Return the findUserByLoginToken function from the userStorage
+  public get findUserByLoginToken(): DatabaseInterface['findUserByLoginToken'] {
+    return this.userStorage.findUserByLoginToken.bind(this.userStorage);
+  }
+
+  // Return the addLoginToken function from the userStorage
+  public get addLoginToken(): DatabaseInterface['addLoginToken'] {
+    return this.userStorage.addLoginToken.bind(this.userStorage);
+  }
+
+  // Return the addLoginToken function from the userStorage
+  public get removeAllLoginTokens(): DatabaseInterface['removeAllLoginTokens'] {
+    return this.userStorage.removeAllLoginTokens.bind(this.userStorage);
+  }
 }

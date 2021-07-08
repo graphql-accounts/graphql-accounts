@@ -1,0 +1,43 @@
+{
+  "name": "@accounts/magic-link",
+  "version": "0.32.0",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib",
+    "start": "tsc --watch",
+    "precompile": "yarn clean",
+    "compile": "tsc",
+    "prepublishOnly": "yarn compile",
+    "testonly": "jest --coverage",
+    "coverage": "jest --coverage"
+  },
+  "files": [
+    "src",
+    "lib"
+  ],
+  "jest": {
+    "testEnvironment": "node",
+    "preset": "ts-jest"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "tslib": "2.1.0"
+  },
+  "devDependencies": {
+    "@accounts/server": "^0.32.0",
+    "@accounts/types": "^0.32.0",
+    "@types/bcryptjs": "2.4.2",
+    "@types/jest": "26.0.19",
+    "@types/lodash.set": "4.3.6",
+    "@types/node": "14.0.14",
+    "jest": "26.6.3",
+    "lodash.set": "4.3.2",
+    "rimraf": "3.0.2",
+    "ts-jest": "26.5.0"
+  },
+  "peerDependencies": {
+    "@accounts/server": "^0.32.0"
+  }
+}

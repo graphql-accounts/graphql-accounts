@@ -28,6 +28,8 @@ export default gql`
     user: UserInput
     # Two factor
     code: String
+    # Token
+    token: String
   }
 
   input ImpersonationUserIdentityInput {

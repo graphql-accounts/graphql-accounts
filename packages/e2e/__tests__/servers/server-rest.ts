@@ -68,6 +68,10 @@ export class ServerRestTest implements ServerTestInterface {
             text: () => `Your account password has been successfully changed`,
             html: () => `Your account password has been successfully changed.`,
           },
+          magicLink: {
+            subject: () => 'Your magic link',
+            text: (user: User, url: string) => convertUrlToToken(url),
+          },
         },
         sendMail: async (mail) => {
           this.emails.push(mail);

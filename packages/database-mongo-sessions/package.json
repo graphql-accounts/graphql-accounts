@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@types/jest": "26.0.15",
-    "@types/mongodb": "3.6.6",
+    "@types/mongodb": "3.6.18",
     "@types/node": "14.14.9",
     "jest": "26.6.3",
     "ts-jest": "26.5.0"

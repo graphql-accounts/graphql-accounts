@@ -1,0 +1,7 @@
+version: '3.6'
+services:
+  db-mongo-accounts:
+    image: mongo:3.6.5-jessie
+    ports:
+      - '27017:27017'
+    restart: always

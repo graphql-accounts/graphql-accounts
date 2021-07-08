@@ -4,6 +4,7 @@ import { AccountsModule } from '../../../src/modules/accounts/index';
 const accountsServer = {
   getServices: () => ({
     password: {},
+    magicLink: {},
   }),
 };
 

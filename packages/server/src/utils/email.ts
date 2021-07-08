@@ -31,6 +31,12 @@ export const emailTemplates: EmailTemplatesType = {
     text: () => `Your account password has been successfully changed`,
     html: () => `Your account password has been successfully changed.`,
   },
+
+  magicLink: {
+    subject: () => 'Your magic link',
+    text: (user: User, url: string) => `To log in please click on this link: ${url}`,
+    html: (user: User, url: string) => `To log in please <a href="${url}">click here</a>.`,
+  },
 };
 
 export type SendMailType = (mail: object) => Promise<void>;
